@@ -32,3 +32,5 @@ else()
   set(link_args ${BDWGC_LIBRARY} -lm)
 endif()
 set(JAWA_LINK_ARGS "${link_args}" CACHE INTERNAL "Extra arguments for linking Jawa programs")
+
+install(TARGETS jawa_rt ARCHIVE DESTINATION lib)
