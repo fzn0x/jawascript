@@ -1,0 +1,24 @@
+[package]
+name = "jawac"
+description = "The Jawa compiler driver: Rust frontend, MLIR code generation through cxx"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+# CMake links this static library with the C++ backend into the `jawac`
+# executable (see tools/jawac). Its tests live in the lit suite, since the
+# library cannot link on its own.
+[lib]
+crate-type = ["staticlib"]
+test = false
+doctest = false
+
+[dependencies]
+cxx = "1.0"
+jawa-frontend = { path = "../jawa-frontend" }
+
+[build-dependencies]
+cxx-build = "1.0"
