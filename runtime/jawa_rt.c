@@ -134,21 +134,31 @@ jawa_str *jawa_rt_int_to_str(int64_t value) {
 }
 
 /* Formats a float with the fewest digits that read back as the same value,
- * and always with a `.` or exponent so it never looks like a `wilangan`. */
+ * and always with a `.` or exponent so it never looks like a `wilangan`.
+ * Like Python and JavaScript, values from 1e-4 up to 1e16 print in plain
+ * decimal (100.0, 0.0001) and the rest in scientific notation (1e+16). */
 static int format_float(char *buffer, size_t size, double value) {
   if (isnan(value))
     return snprintf(buffer, size, "nan");
   if (isinf(value))
     return snprintf(buffer, size, value < 0 ? "-inf" : "inf");
+  if (value == 0)
+    return snprintf(buffer, size, signbit(value) ? "-0.0" : "0.0");
+
+  /* The fewest significant digits that read back as `value`. */
+  int digits = 1;
   int len = 0;
-  for (int precision = 1; precision <= 17; precision++) {
-    len = snprintf(buffer, size, "%.*g", precision, value);
+  for (; digits <= 17; digits++) {
+    len = snprintf(buffer, size, "%.*e", digits - 1, value);
     if (strtod(buffer, NULL) == value)
       break;
   }
-  if (!strpbrk(buffer, ".e"))
-    len += snprintf(buffer + len, size - (size_t)len, ".0");
-  return len;
+  int exponent = atoi(strchr(buffer, 'e') + 1);
+  if (exponent < -4 || exponent >= 16)
+    return len;
+
+  int decimals = digits - 1 - exponent;
+  return snprintf(buffer, size, "%.*f", decimals < 1 ? 1 : decimals, value);
 }
 
 jawa_str *jawa_rt_float_to_str(double value) {
