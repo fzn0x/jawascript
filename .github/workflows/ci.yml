@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Rust frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo test --package jawa-frontend --locked
+
+  format:
+    name: C++ formatting
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: |
+          wget -q https://apt.llvm.org/llvm.sh
+          sudo bash llvm.sh 23
+          sudo apt-get install -y clang-format-23
+      - name: Check the C++ and C sources
+        run: git ls-files '*.cpp' '*.h' '*.c' | xargs clang-format-23 --dry-run --Werror
+
+  linux:
+    name: Build and test (Ubuntu, LLVM 23)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install LLVM, MLIR and bdwgc
+        run: |
+          wget -q https://apt.llvm.org/llvm.sh
+          sudo bash llvm.sh 23
+          sudo apt-get install -y libmlir-23-dev mlir-23-tools llvm-23-tools \
+            lld-23 clang-23 libgc-dev ninja-build
+          echo /usr/lib/llvm-23/bin >> "$GITHUB_PATH"
+      - name: Build and test
+        env:
+          CC: clang
+          CXX: clang++
+          CMAKE_ARGS: -DLLVM_USE_LINKER=lld -DMLIR_DIR=/usr/lib/llvm-23/lib/cmake/mlir
+        run: scripts/test.sh
+
+  windows:
+    name: Build and test (Windows, MSYS2)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          pacboy: >-
+            clang:p lld:p cmake:p ninja:p mlir:p llvm:p llvm-tools:p
+            gc:p rust:p python:p python-pip:p
+      - name: Build and test
+        run: scripts/test.sh
