@@ -2,7 +2,7 @@
 
 This guide follows one small program through every stage of the compiler:
 
-```rust
+```ts
 gawe gunggung(larik: wilangan[]): wilangan {
     ayo asil = 0
     kanggo x ing larik {

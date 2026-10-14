@@ -6,7 +6,7 @@ Every word Jawa uses, what it means in Javanese, and what it corresponds to in J
 
 ## Keywords
 
-| Jawa | Literally | JavaScript / TypeScript | Example |
+| Jawa | Literally | JS / TS | Example |
 | --- | --- | --- | --- |
 | `gawe` | make, do | `function` | `gawe tikel(n: wilangan): wilangan { … }` |
 | `ayo` | let's | `let` | `ayo umur = 20` |
@@ -23,7 +23,7 @@ Every word Jawa uses, what it means in Javanese, and what it corresponds to in J
 
 ## Values and operators
 
-| Jawa | Literally | JavaScript / TypeScript | Example |
+| Jawa | Literally | JS / TS | Example |
 | --- | --- | --- | --- |
 | `bener` | right, correct | `true` | `ayo rampung = bener` |
 | `salah` | wrong, mistaken | `false` | `yen rampung == salah { … }` |
@@ -36,7 +36,7 @@ Every word Jawa uses, what it means in Javanese, and what it corresponds to in J
 
 ## Types
 
-| Jawa | Literally | JavaScript / TypeScript | Example |
+| Jawa | Literally | JS / TS | Example |
 | --- | --- | --- | --- |
 | `wilangan` | number, count | `number` (integers: 64-bit) | `ayo cacah: wilangan = 0` |
 | `pecahan` | fraction | `number` (floats: 64-bit) | `ayo dhuwur: pecahan = 1.62` |
@@ -47,7 +47,7 @@ Every word Jawa uses, what it means in Javanese, and what it corresponds to in J
 
 ## Built-in functions
 
-| Jawa | Literally | JavaScript / TypeScript | Example |
+| Jawa | Literally | JS / TS | Example |
 | --- | --- | --- | --- |
 | `utama` | main, foremost | the entry point | `gawe utama() { … }` |
 | `tulis` | write | `console.log` | `tulis("umur:", umur)` |

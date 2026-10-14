@@ -87,16 +87,16 @@ tetep jeneng = "Sri"
 tulis(`Sugeng enjing, ${jeneng}! ${1 + 1} + ${0.5} = ${2.5}`)
 ```
 
-**Semicolons are optional.** A line break ends a statement when the line ends with something that can end one: a name, a literal, `bali`, `mandheg`, `terusna`, `++`, `--`, a type name, or a closing `)`, `]` or `}`. Line breaks inside `( … )` and `[ … ]` never end a statement, so long argument lists and arrays can span lines. Two consequences:
+**Semicolons are optional.** A line break ends a statement when the line ends with something that can end one: a name, a literal, `bali`, `mandheg`, `terusna`, `++`, `--`, a type name, or a closing `)`, `]` or `}`. Line breaks inside `( … )` and `[ … ]` never end a statement, so long argument lists and arrays can span lines.
 
-- An operator that continues an expression goes at the end of the line, not the start of the next:
+This has two consequences. An operator that continues an expression goes at the end of the line, not the start of the next:
 
-  ```ts
-  ayo gunggung = siji +
-      loro
-  ```
+```ts
+ayo gunggung = siji +
+    loro
+```
 
-- An opening brace goes on the same line as `gawe`, `yen`, `sajrone` or `kanggo`. (`liyane` may start the line after a closing `}`.)
+And an opening brace goes on the same line as `gawe`, `yen`, `sajrone` or `kanggo`. (`liyane` may start the line after a closing `}`.)
 
 Writing the semicolons, as in JavaScript, works too.
 
