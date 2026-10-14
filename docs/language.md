@@ -47,14 +47,14 @@ The punctuation is the same; the words are Javanese.
 | `if (c) { } else if (d) { } else { }` | `yen (c) { } liyane yen (d) { } liyane { }` | *yen*: if; *liyane*: the other |
 | `while (c) { }` | `sajrone (c) { }` | *sajrone*: during |
 | `for (let i = 0; i < n; i++) { }` | `kanggo (ayo i = 0; i < n; i++) { }` | *kanggo*: for |
-| `for (const x of xs) { }` | `kanggo (tetep x ing xs) { }` | *ing*: in |
+| `for (const x of larik) { }` | `kanggo (tetep x ing larik) { }` | *ing*: in |
 | `break`, `continue`, `return x` | `mandheg`, `terusna`, `bali x` | stop, carry on, go back |
 | `true`, `false`, `null` | `bener`, `salah`, `kosong` | right, wrong, empty |
 | `&&`, `\|\|`, `!` | the same, or `lan`, `utawa`, `ora` | and, or, not |
 | `===`, `!==` | the same, or `==`, `!=` | |
 | `` `n = ${n}` `` | the same | |
 | `console.log(a, b)` | `tulis(a, b)` | *tulis*: write |
-| `xs.length`, `xs.push(x)` | `dawane(xs)`, `tambah(xs, x)` | its length, add |
+| `larik.length`, `larik.push(x)` | `dawane(larik)`, `tambah(larik, x)` | its length, add |
 | `throw new Error(msg)` | `gagal(msg)` | *gagal*: fail |
 | `number` | `wilangan` (integer) or `pecahan` (float) | number, fraction |
 | `string`, `boolean`, `void` | `ukara`, `logika`, `suwung` | sentence, logic, empty |
@@ -65,7 +65,7 @@ What is different:
 
 - **Types are checked when you compile**, not when the program runs, and there is no `any` and no implicit conversion except joining text with `+`. Integers (`wilangan`) and floats (`pecahan`) are separate types.
 - **Structs are nominal records**, built with `Titik { x: 1, y: 2 }`. There are no classes, methods, closures or exceptions; functions are declared at the top level.
-- **`i++` is a statement**, not an expression: `xs[i++]` is not allowed.
+- **`i++` is a statement**, not an expression: `larik[i++]` is not allowed.
 - **Jawa has its own spellings too.** `kanggo i ing 0..10` loops over a range, and `ora`, `lan` and `utawa` read as words. `ora` binds below the comparisons, as `not` does in Python, while `!` binds tightly, as in JavaScript.
 
 If you type a JavaScript word by habit (`let`, `function`, `true`, `number`, `console.log`), the compiler tells you the Jawa word.
@@ -84,7 +84,7 @@ If you type a JavaScript word by habit (`let`, `function`, `true`, `number`, `co
 
 ```ts
 tetep jeneng = "Sri"
-tulis(`Halo, ${jeneng}! ${1 + 1} + ${0.5} = ${2.5}`)
+tulis(`Sugeng enjing, ${jeneng}! ${1 + 1} + ${0.5} = ${2.5}`)
 ```
 
 **Semicolons are optional.** A line break ends a statement when the line ends with something that can end one: a name, a literal, `bali`, `mandheg`, `terusna`, `++`, `--`, a type name, or a closing `)`, `]` or `}`. Line breaks inside `( … )` and `[ … ]` never end a statement, so long argument lists and arrays can span lines. Two consequences:
@@ -92,7 +92,7 @@ tulis(`Halo, ${jeneng}! ${1 + 1} + ${0.5} = ${2.5}`)
 - An operator that continues an expression goes at the end of the line, not the start of the next:
 
   ```ts
-  ayo total = siji +
+  ayo gunggung = siji +
       loro
   ```
 
@@ -124,10 +124,10 @@ tulis(a)    // [100, 2, 3]
 ## Variables
 
 ```ts
-ayo umur = 20               // can change
-tetep jeneng = "Sri"        // cannot change
-ayo dhuwur: pecahan = 1     // with a type
-ayo xs: wilangan[] = []     // an empty array needs its type spelled out
+ayo umur = 20                 // can change
+tetep jeneng = "Sri"          // cannot change
+ayo dhuwur: pecahan = 1       // with a type
+ayo larik: wilangan[] = []    // an empty array needs its type spelled out
 ```
 
 Every variable starts with a value. Without a type, it takes the type of its value; an empty array `[]` and `kosong` need a type, since nothing else says what they hold. Assigning to a `tetep` variable is a compile error. A `tetep` array or struct can still have its contents changed; only the variable is fixed.
@@ -172,13 +172,13 @@ tulis(`umur: ${20}, diwasa: ${bener}`)        // the same
 **Array and struct literals:**
 
 ```ts
-ayo xs = [1, 2, 3]
+ayo larik = [1, 2, 3]
 ayo p = Titik { x: 1.5, y: 2 }   // every field, in any order
 ```
 
 ## Statements
 
-**Assignment**: `x = v`, `xs[i] = v`, `p.field = v`, the compound forms `+=`, `-=`, `*=`, `/=`, `%=`, and `x++`, `x--`, `++x`, `--x` (as statements of their own). `s += t` appends to a string variable.
+**Assignment**: `x = v`, `larik[i] = v`, `p.field = v`, the compound forms `+=`, `-=`, `*=`, `/=`, `%=`, and `x++`, `x--`, `++x`, `--x` (as statements of their own). `s += t` appends to a string variable.
 
 **Conditionals.** The parentheses are optional:
 
@@ -201,11 +201,11 @@ sajrone (n !== 1) { }                   // while
 
 kanggo (ayo i = 0; i < 10; i++) { }     // like JavaScript's for
 kanggo (;;) { }                         // forever, until mandheg or bali
-kanggo (tetep x ing xs) { }             // each element of an array
+kanggo (tetep x ing larik) { }          // each element of an array
 
 kanggo i ing 0..10 { }                  // 0 to 9
 kanggo i ing 1..=10 { }                 // 1 to 10
-kanggo x ing xs { }                     // each element, without parentheses
+kanggo x ing larik { }                  // each element, without parentheses
 ```
 
 In `kanggo (init; condition; update)` each part may be left out, and a variable declared in `init` belongs to the loop. A range's end is evaluated once, before the loop. A loop over an array re-reads its length each time round, so elements appended in the body are visited too. The variable of a range or array loop cannot be assigned to.
@@ -224,7 +224,7 @@ gawe jarak(a: Titik, b: Titik): pecahan {
 }
 ```
 
-Parameters need types, and the return type follows `:` (or `->`). A function with a return type must `bali` a value on every path; the compiler checks this. A function without one returns nothing, and `bali` on its own leaves it early. Parameters behave like `ayo` variables inside the function. Functions can call each other, and themselves, in any order. Functions cannot be nested, and there are no methods: write `tambah(xs, x)`, not `xs.push(x)`.
+Parameters need types, and the return type follows `:` (or `->`). A function with a return type must `bali` a value on every path; the compiler checks this. A function without one returns nothing, and `bali` on its own leaves it early. Parameters behave like `ayo` variables inside the function. Functions can call each other, and themselves, in any order. Functions cannot be nested, and there are no methods: write `tambah(larik, x)`, not `larik.push(x)`.
 
 ## Structs
 
@@ -250,7 +250,7 @@ kanggo (ayo i = 0; i < 3; i++) {
 | --- | --- |
 | `tulis(a, b, …)` | Prints its arguments separated by spaces, then a line break. It prints numbers, `logika`, `ukara`, and arrays of those. |
 | `dawane(x)` | The length of an `ukara` (in bytes) or an array |
-| `tambah(xs, x)` | Appends `x` to the array `xs` |
+| `tambah(larik, x)` | Appends `x` to the array `larik` |
 | `gagal(pesen)` | Stops the program with the message `pesen` |
 
 Floats print with the fewest digits that read back as the same number, and always with a point or an exponent: `2.0`, `0.30000000000000004`, `1e+16`. Booleans print as `bener` and `salah`. Strings inside arrays print quoted: `["a", "b"]`.

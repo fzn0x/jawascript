@@ -3,16 +3,16 @@
 This guide follows one small program through every stage of the compiler:
 
 ```rust
-gawe jumlah(xs: wilangan[]): wilangan {
-    ayo total = 0
-    kanggo x ing xs {
-        total += x
+gawe gunggung(larik: wilangan[]): wilangan {
+    ayo asil = 0
+    kanggo x ing larik {
+        asil += x
     }
-    bali total
+    bali asil
 }
 
 gawe utama() {
-    tulis("jumlah:", jumlah([1, 2, 3]))
+    tulis("gunggung:", gunggung([1, 2, 3]))
 }
 ```
 
@@ -64,9 +64,9 @@ CMake builds the crate with Cargo, passing its C and C++ compilers through so th
 The frontend's output keeps the shape of the source (`jawac --emit=mlir`):
 
 ```mlir
-func.func private @jumlah(%arg0: !jawa.array<i64>) -> i64 {
-  %0 = jawa.alloca "xs" : !jawa.ptr<!jawa.array<i64>>
-  %1 = jawa.alloca "total" : !jawa.ptr<i64>
+func.func private @gunggung(%arg0: !jawa.array<i64>) -> i64 {
+  %0 = jawa.alloca "larik" : !jawa.ptr<!jawa.array<i64>>
+  %1 = jawa.alloca "asil" : !jawa.ptr<i64>
   %2 = jawa.alloca "indeks" : !jawa.ptr<i64>
   %3 = jawa.alloca "x" : !jawa.ptr<i64>
   jawa.store %arg0, %0 : !jawa.ptr<!jawa.array<i64>>
@@ -115,10 +115,10 @@ At `-O1` and above, `JawaPipeline` (`lib/Pipeline/Pipeline.cpp`) runs:
 3. `mem2reg`, `canonicalize` and `cse` on the flat CFG: variables become SSA values and block arguments.
 4. `symbol-dce`: every function but `utama` is private, so unused ones disappear.
 
-After this (`jawac --emit=mlir-opt`), the loop counter and the total are block arguments:
+After this (`jawac --emit=mlir-opt`), the loop counter and the running sum are block arguments:
 
 ```mlir
-func.func private @jumlah(%arg0: !jawa.array<i64>) -> i64 {
+func.func private @gunggung(%arg0: !jawa.array<i64>) -> i64 {
   %0 = jawa.const 1 : i64
   %1 = jawa.const 0 : i64
   cf.br ^bb1(%1, %1 : i64, i64)
@@ -148,7 +148,7 @@ func.func private @jumlah(%arg0: !jawa.array<i64>) -> i64 {
 
 ## 6. LLVM and linking
 
-The LLVM dialect is translated to LLVM IR for the host triple and data layout, and LLVM's `-O<n>` pipeline runs. Because the checks are plain branches by now, LLVM can reason about them. In `jumlah`, inlined into `utama`, it proves the index is always below the length, removes the bounds check, and vectorizes the sum (`jawac --emit=llvm`, abridged):
+The LLVM dialect is translated to LLVM IR for the host triple and data layout, and LLVM's `-O<n>` pipeline runs. Because the checks are plain branches by now, LLVM can reason about them. In `gunggung`, inlined into `utama`, it proves the index is always below the length, removes the bounds check, and vectorizes the sum (`jawac --emit=llvm`, abridged):
 
 ```llvm
 vector.body:

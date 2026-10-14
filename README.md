@@ -150,13 +150,13 @@ The punctuation is the same; the words are Javanese.
 | `if (c) { } else if (d) { } else { }` | `yen (c) { } liyane yen (d) { } liyane { }` | *yen*: if; *liyane*: the other |
 | `while (c) { }` | `sajrone (c) { }` | *sajrone*: during |
 | `for (let i = 0; i < n; i++) { }` | `kanggo (ayo i = 0; i < n; i++) { }` | *kanggo*: for |
-| `for (const x of xs) { }` | `kanggo (tetep x ing xs) { }` | *ing*: in |
+| `for (const x of larik) { }` | `kanggo (tetep x ing larik) { }` | *ing*: in |
 | `break`, `continue`, `return x` | `mandheg`, `terusna`, `bali x` | stop, carry on, go back |
 | `true`, `false`, `null` | `bener`, `salah`, `kosong` | right, wrong, empty |
 | `&&`, `\|\|`, `!`, `===` | the same, or `lan`, `utawa`, `ora`, `==` | and, or, not |
 | `` `n = ${n}` `` | the same | |
 | `console.log(a, b)` | `tulis(a, b)` | *tulis*: write |
-| `xs.length`, `xs.push(x)` | `dawane(xs)`, `tambah(xs, x)` | its length, add |
+| `larik.length`, `larik.push(x)` | `dawane(larik)`, `tambah(larik, x)` | its length, add |
 | `throw new Error(msg)` | `gagal(msg)` | *gagal*: fail |
 | `number` | `wilangan` (integer) or `pecahan` (float) | number, fraction |
 | `string`, `boolean`, `number[]` | `ukara`, `logika`, `wilangan[]` | sentence, logic |
