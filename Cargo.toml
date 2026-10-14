@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = ["crates/jawa-frontend"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["fzn0x"]
+repository = "https://github.com/fzn0x/jawascript"
+rust-version = "1.80"
+
+[profile.release]
+debug = false
