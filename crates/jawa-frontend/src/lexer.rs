@@ -6,14 +6,17 @@
 //! closing `)`, `]` or `}`). Line breaks inside `(…)` and `[…]` never end a
 //! statement, so argument lists and array literals can span lines.
 //!
+//! JavaScript's operators work as they do there: `&&`, `||` and `!` are
+//! `lan`, `utawa` and `ora`, `===` and `!==` are `==` and `!=`, and `++` and
+//! `--` increment and decrement. Template strings use backticks and `${…}`.
+//!
 //! The lexer also keeps one mistake from spoiling the rest of the file: a
-//! line that starts with a statement keyword such as `ayo` closes any `(` or
-//! `[` left open above it, and `&&`, `||` and `!` are reported but read as
-//! `lan`, `utawa` and `ora`.
+//! line that starts with a statement keyword such as `yen` closes any `(` or
+//! `[` left open above it.
 
 use crate::diag::Diagnostic;
 use crate::source::Span;
-use crate::token::{Token, TokenKind};
+use crate::token::{TemplatePiece, Token, TokenKind};
 
 pub struct Lexed {
     pub tokens: Vec<Token>,
@@ -26,7 +29,7 @@ pub fn lex(text: &str) -> Lexed {
         pos: 0,
         tokens: Vec::new(),
         diagnostics: Vec::new(),
-        delimiters: Vec::new(),
+        groups: Vec::new(),
         line_break_before: None,
     };
     lexer.run();
@@ -36,13 +39,40 @@ pub fn lex(text: &str) -> Lexed {
     }
 }
 
+/// Lexes `text` as if it started at byte `offset` of a larger file, as the
+/// expressions inside a template string's `${…}` do.
+pub fn lex_at(text: &str, offset: usize) -> Lexed {
+    let mut lexed = lex(text);
+    let shift = |span: &mut Span| {
+        span.start += offset as u32;
+        span.end += offset as u32;
+    };
+    lexed
+        .tokens
+        .iter_mut()
+        .for_each(|token| shift(&mut token.span));
+    lexed
+        .diagnostics
+        .iter_mut()
+        .for_each(|diagnostic| shift(&mut diagnostic.span));
+    lexed
+}
+
+/// An open `(`, `[` or `{`.
+struct Group {
+    kind: TokenKind,
+    /// A `(` right after `kanggo`, whose header may hold `ayo` or `tetep`:
+    /// `kanggo (ayo i = 0; i < 10; i++)`.
+    loop_header: bool,
+}
+
 struct Lexer<'a> {
     text: &'a str,
     pos: usize,
     tokens: Vec<Token>,
     diagnostics: Vec<Diagnostic>,
-    /// Open `(`, `[` and `{` tokens, innermost last.
-    delimiters: Vec<TokenKind>,
+    /// Open groups, innermost last.
+    groups: Vec<Group>,
     /// Where the current line began, while no token is on it yet.
     line_break_before: Option<usize>,
 }
@@ -86,15 +116,16 @@ impl Lexer<'_> {
             .push(Diagnostic::error(Span::new(start, self.pos), message));
     }
 
-    /// Inserts a statement terminator for the line break at `at`, if the
-    /// previous token can end a statement.
+    /// Whether the innermost open group is a `(` or `[`, where line breaks do
+    /// not end statements.
     fn inside_group(&self) -> bool {
-        matches!(
-            self.delimiters.last(),
-            Some(TokenKind::LParen | TokenKind::LBracket)
-        )
+        self.groups
+            .last()
+            .is_some_and(|group| matches!(group.kind, TokenKind::LParen | TokenKind::LBracket))
     }
 
+    /// Inserts a statement terminator for the line break at `at`, if the
+    /// previous token can end a statement.
     fn line_break(&mut self, at: usize) {
         if self.inside_group() {
             return;
@@ -130,6 +161,7 @@ impl Lexer<'_> {
                 }
                 '/' if self.peek_second() == Some('*') => self.block_comment(),
                 '"' => self.string(),
+                '`' => self.template(),
                 c if c.is_ascii_digit() => self.number(),
                 c if c.is_alphabetic() || c == '_' => self.word(),
                 _ => self.punctuation(),
@@ -171,13 +203,16 @@ impl Lexer<'_> {
         }
         let word = &self.text[start..self.pos];
         let kind = TokenKind::keyword(word).unwrap_or_else(|| TokenKind::Ident(word.to_string()));
-        // `ayo`, `yen` and friends never appear inside parentheses, so a line
-        // starting with one means a `(` or `[` above was never closed. Close
-        // it here and end the previous line, so the error stays on that line.
-        if kind.only_starts_statements() && self.inside_group() {
+        // `ayo`, `yen` and friends never appear inside parentheses (except
+        // `ayo` and `tetep` in a `kanggo (…)` header), so a line starting with
+        // one means a `(` or `[` above was never closed. Close it here and end
+        // the previous line, so the error stays on that line.
+        let in_loop_header = self.groups.last().is_some_and(|group| group.loop_header)
+            && matches!(kind, TokenKind::Ayo | TokenKind::Tetep);
+        if kind.only_starts_statements() && self.inside_group() && !in_loop_header {
             if let Some(line_break) = self.line_break_before {
                 while self.inside_group() {
-                    self.delimiters.pop();
+                    self.groups.pop();
                 }
                 self.line_break(line_break);
             }
@@ -268,6 +303,25 @@ impl Lexer<'_> {
         }
     }
 
+    /// Reads the escape after a `\` into `value`. Returns false at the end of
+    /// the file.
+    fn escape(&mut self, value: &mut String, escape_start: usize) -> bool {
+        match self.bump() {
+            Some('n') => value.push('\n'),
+            Some('t') => value.push('\t'),
+            Some('r') => value.push('\r'),
+            Some('0') => value.push('\0'),
+            Some(c @ ('\\' | '"' | '\'' | '`' | '$')) => value.push(c),
+            Some('u') => match self.unicode_escape() {
+                Some(c) => value.push(c),
+                None => self.error(escape_start, "invalid unicode escape, expected `\\u{…}`"),
+            },
+            Some(other) => self.error(escape_start, format!("unknown escape `\\{other}`")),
+            None => return false,
+        }
+        true
+    }
+
     fn string(&mut self) {
         let start = self.pos;
         self.bump();
@@ -276,28 +330,12 @@ impl Lexer<'_> {
             let escape_start = self.pos;
             match self.bump() {
                 Some('"') => break,
-                Some('\\') => match self.bump() {
-                    Some('n') => value.push('\n'),
-                    Some('t') => value.push('\t'),
-                    Some('r') => value.push('\r'),
-                    Some('0') => value.push('\0'),
-                    Some('\\') => value.push('\\'),
-                    Some('"') => value.push('"'),
-                    Some('\'') => value.push('\''),
-                    Some('u') => match self.unicode_escape() {
-                        Some(c) => value.push(c),
-                        None => {
-                            self.error(escape_start, "invalid unicode escape, expected `\\u{…}`")
-                        }
-                    },
-                    Some(other) => {
-                        self.error(escape_start, format!("unknown escape `\\{other}`"));
-                    }
-                    None => {
+                Some('\\') => {
+                    if !self.escape(&mut value, escape_start) {
                         self.error(start, "unterminated string");
                         break;
                     }
-                },
+                }
                 Some('\n') => {
                     // Leave the line break for the main loop so it can still
                     // end the statement.
@@ -313,6 +351,79 @@ impl Lexer<'_> {
             }
         }
         self.push(TokenKind::Str(value), start);
+    }
+
+    /// A template string: `` `text ${expression} text` ``. It may span lines.
+    /// The source of each `${…}` is kept for the parser to read.
+    fn template(&mut self) {
+        let start = self.pos;
+        self.bump();
+        let mut pieces = Vec::new();
+        let mut text = String::new();
+        loop {
+            let piece_start = self.pos;
+            match self.bump() {
+                Some('`') => break,
+                Some('\\') => {
+                    if !self.escape(&mut text, piece_start) {
+                        self.error(start, "unterminated template string");
+                        break;
+                    }
+                }
+                Some('$') if self.peek() == Some('{') => {
+                    self.bump();
+                    let code_start = self.pos;
+                    if !self.skip_template_code() {
+                        self.error(piece_start, "this `${` is never closed");
+                        break;
+                    }
+                    if !text.is_empty() {
+                        pieces.push(TemplatePiece::Text(std::mem::take(&mut text)));
+                    }
+                    pieces.push(TemplatePiece::Code {
+                        source: self.text[code_start..self.pos].to_string(),
+                        offset: code_start,
+                    });
+                    self.bump(); // `}`
+                }
+                Some(c) => text.push(c),
+                None => {
+                    self.error(start, "unterminated template string");
+                    break;
+                }
+            }
+        }
+        if !text.is_empty() || pieces.is_empty() {
+            pieces.push(TemplatePiece::Text(text));
+        }
+        self.push(TokenKind::Template(pieces), start);
+    }
+
+    /// Moves to the `}` that closes a `${`, past nested braces, strings and
+    /// templates. Returns false if the file ends first.
+    fn skip_template_code(&mut self) -> bool {
+        let mut depth = 0usize;
+        while let Some(c) = self.peek() {
+            match c {
+                '}' if depth == 0 => return true,
+                '{' => depth += 1,
+                '}' => depth -= 1,
+                '"' | '`' => {
+                    self.bump();
+                    while let Some(inner) = self.bump() {
+                        if inner == '\\' {
+                            self.bump();
+                        } else if inner == c {
+                            break;
+                        }
+                    }
+                    continue;
+                }
+                _ => {}
+            }
+            self.bump();
+        }
+        false
     }
 
     fn unicode_escape(&mut self) -> Option<char> {
@@ -351,8 +462,10 @@ impl Lexer<'_> {
             '.' => TokenKind::Dot,
             '-' if self.eat('>') => TokenKind::Arrow,
             '-' if self.eat('=') => TokenKind::MinusEq,
+            '-' if self.eat('-') => TokenKind::MinusMinus,
             '-' => TokenKind::Minus,
             '+' if self.eat('=') => TokenKind::PlusEq,
+            '+' if self.eat('+') => TokenKind::PlusPlus,
             '+' => TokenKind::Plus,
             '*' if self.eat('=') => TokenKind::StarEq,
             '*' => TokenKind::Star,
@@ -360,27 +473,33 @@ impl Lexer<'_> {
             '/' => TokenKind::Slash,
             '%' if self.eat('=') => TokenKind::PercentEq,
             '%' => TokenKind::Percent,
-            '=' if self.eat('=') => TokenKind::EqEq,
+            // `===` and `!==` mean the same as `==` and `!=`: types are
+            // checked at compile time, so there is no loose equality.
+            '=' if self.eat('=') => {
+                self.eat('=');
+                TokenKind::EqEq
+            }
             '=' => TokenKind::Eq,
-            '!' if self.eat('=') => TokenKind::NotEq,
+            '!' if self.eat('=') => {
+                self.eat('=');
+                TokenKind::NotEq
+            }
             '<' if self.eat('=') => TokenKind::Le,
             '<' => TokenKind::Lt,
             '>' if self.eat('=') => TokenKind::Ge,
             '>' => TokenKind::Gt,
-            // C-style logic: report it, but read the Javanese word so the rest
-            // of the line still parses.
-            '!' => {
-                self.error(start, "unexpected `!`; logical not is spelled `ora`");
-                TokenKind::Ora
-            }
+            // JavaScript's logic operators are the Javanese words.
+            '!' => TokenKind::Bang,
+            '&' if self.eat('&') => TokenKind::Lan,
+            '|' if self.eat('|') => TokenKind::Utawa,
+            // There are no bitwise operators; report it, but read the logic
+            // operator so the rest of the line still parses.
             '&' => {
-                self.eat('&');
-                self.error(start, "unexpected `&`; use `lan` for logic");
+                self.error(start, "unexpected `&`; use `&&` or `lan` for logic");
                 TokenKind::Lan
             }
             '|' => {
-                self.eat('|');
-                self.error(start, "unexpected `|`; use `utawa` for logic");
+                self.error(start, "unexpected `|`; use `||` or `utawa` for logic");
                 TokenKind::Utawa
             }
             other => {
@@ -390,10 +509,18 @@ impl Lexer<'_> {
         };
         match kind {
             TokenKind::LParen | TokenKind::LBracket | TokenKind::LBrace => {
-                self.delimiters.push(kind.clone());
+                let loop_header = kind == TokenKind::LParen
+                    && self
+                        .tokens
+                        .last()
+                        .is_some_and(|token| token.kind == TokenKind::Kanggo);
+                self.groups.push(Group {
+                    kind: kind.clone(),
+                    loop_header,
+                });
             }
             TokenKind::RParen | TokenKind::RBracket | TokenKind::RBrace => {
-                self.delimiters.pop();
+                self.groups.pop();
             }
             _ => {}
         }
@@ -545,29 +672,128 @@ mod tests {
     }
 
     #[test]
-    fn suggests_javanese_logic_words() {
-        let lexed = lex("yen a && b || !c {}");
-        let messages: Vec<_> = lexed.diagnostics.iter().map(|d| &d.message).collect();
+    fn javascript_operators() {
         assert_eq!(
-            messages,
-            [
-                "unexpected `&`; use `lan` for logic",
-                "unexpected `|`; use `utawa` for logic",
-                "unexpected `!`; logical not is spelled `ora`",
-            ]
-        );
-        // The rest of the line still reads as Jawa.
-        let kinds: Vec<_> = lexed.tokens.into_iter().map(|t| t.kind).collect();
-        assert_eq!(
-            kinds,
+            kinds("a && b || !c === d !== e"),
             vec![
-                Yen,
                 ident("a"),
                 Lan,
                 ident("b"),
                 Utawa,
-                Ora,
+                Bang,
                 ident("c"),
+                EqEq,
+                ident("d"),
+                NotEq,
+                ident("e"),
+                Newline,
+                Eof
+            ]
+        );
+    }
+
+    #[test]
+    fn single_ampersand_is_reported_but_read_as_and() {
+        let lexed = lex("a & b");
+        assert_eq!(
+            lexed.diagnostics[0].message,
+            "unexpected `&`; use `&&` or `lan` for logic"
+        );
+        assert_eq!(lexed.tokens[1].kind, Lan);
+    }
+
+    #[test]
+    fn increment_and_decrement() {
+        assert_eq!(
+            kinds("i++\nj--\nk += 1"),
+            vec![
+                ident("i"),
+                PlusPlus,
+                Newline,
+                ident("j"),
+                MinusMinus,
+                Newline,
+                ident("k"),
+                PlusEq,
+                Int(1),
+                Newline,
+                Eof
+            ]
+        );
+    }
+
+    #[test]
+    fn template_strings() {
+        let lexed = lex("`fib(${i}) = ${fib(i)}`");
+        assert!(lexed.diagnostics.is_empty());
+        assert_eq!(
+            lexed.tokens[0].kind,
+            Template(vec![
+                TemplatePiece::Text("fib(".into()),
+                TemplatePiece::Code {
+                    source: "i".into(),
+                    offset: 7
+                },
+                TemplatePiece::Text(") = ".into()),
+                TemplatePiece::Code {
+                    source: "fib(i)".into(),
+                    offset: 15
+                },
+            ])
+        );
+    }
+
+    #[test]
+    fn template_strings_nest_and_escape() {
+        let lexed = lex("`a ${f({x: \"}\"})} \\${not} \\` ${`in ${1}`}\nline`");
+        assert!(lexed.diagnostics.is_empty(), "{:?}", lexed.diagnostics);
+        let Template(pieces) = &lexed.tokens[0].kind else {
+            panic!("expected a template")
+        };
+        let sources: Vec<_> = pieces
+            .iter()
+            .map(|piece| match piece {
+                TemplatePiece::Text(text) => format!("text:{text}"),
+                TemplatePiece::Code { source, .. } => format!("code:{source}"),
+            })
+            .collect();
+        assert_eq!(
+            sources,
+            [
+                "text:a ",
+                "code:f({x: \"}\"})",
+                "text: ${not} ` ",
+                "code:`in ${1}`",
+                "text:\nline",
+            ]
+        );
+    }
+
+    #[test]
+    fn unclosed_template_expression() {
+        let lexed = lex("`a ${b");
+        assert_eq!(lexed.diagnostics[0].message, "this `${` is never closed");
+    }
+
+    #[test]
+    fn ayo_may_start_a_line_inside_a_loop_header() {
+        assert_eq!(
+            kinds("kanggo (\nayo i = 0; i < 3; i++\n) {}"),
+            vec![
+                Kanggo,
+                LParen,
+                Ayo,
+                ident("i"),
+                Eq,
+                Int(0),
+                Semi,
+                ident("i"),
+                Lt,
+                Int(3),
+                Semi,
+                ident("i"),
+                PlusPlus,
+                RParen,
                 LBrace,
                 RBrace,
                 Newline,

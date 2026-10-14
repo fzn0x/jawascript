@@ -9,6 +9,9 @@ pub enum TokenKind {
     Int(u64),
     Float(f64),
     Str(String),
+    /// A template string, `` `fib(${i}) = ${fib(i)}` ``, split into text
+    /// and the source of each `${…}`.
+    Template(Vec<TemplatePiece>),
 
     // Keywords.
     /// `gawe`: declares a function ("make, do").
@@ -41,8 +44,10 @@ pub enum TokenKind {
     Lan,
     /// `utawa`: logical or.
     Utawa,
-    /// `ora`: logical not.
+    /// `ora`: logical not, below the comparisons as in Python.
     Ora,
+    /// `!`: logical not, binding tightly as in JavaScript.
+    Bang,
     /// `wujud`: declares a struct ("shape, form").
     Wujud,
     /// `kosong`: the null reference ("empty").
@@ -76,6 +81,10 @@ pub enum TokenKind {
     DotDot,
     DotDotEq,
     Arrow,
+    /// `++`, only as a statement: `i++`.
+    PlusPlus,
+    /// `--`, only as a statement: `i--`.
+    MinusMinus,
     Eq,
     EqEq,
     NotEq,
@@ -135,6 +144,9 @@ impl TokenKind {
                 | TokenKind::Int(_)
                 | TokenKind::Float(_)
                 | TokenKind::Str(_)
+                | TokenKind::Template(_)
+                | TokenKind::PlusPlus
+                | TokenKind::MinusMinus
                 | TokenKind::Bener
                 | TokenKind::Salah
                 | TokenKind::Kosong
@@ -182,6 +194,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Int(value) => return write!(f, "number `{value}`"),
             TokenKind::Float(value) => return write!(f, "number `{value}`"),
             TokenKind::Str(_) => "string",
+            TokenKind::Template(_) => "template string",
             TokenKind::Gawe => "`gawe`",
             TokenKind::Ayo => "`ayo`",
             TokenKind::Tetep => "`tetep`",
@@ -198,6 +211,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Lan => "`lan`",
             TokenKind::Utawa => "`utawa`",
             TokenKind::Ora => "`ora`",
+            TokenKind::Bang => "`!`",
             TokenKind::Wujud => "`wujud`",
             TokenKind::Kosong => "`kosong`",
             TokenKind::Wilangan => "`wilangan`",
@@ -219,6 +233,8 @@ impl fmt::Display for TokenKind {
             TokenKind::DotDot => "`..`",
             TokenKind::DotDotEq => "`..=`",
             TokenKind::Arrow => "`->`",
+            TokenKind::PlusPlus => "`++`",
+            TokenKind::MinusMinus => "`--`",
             TokenKind::Eq => "`=`",
             TokenKind::EqEq => "`==`",
             TokenKind::NotEq => "`!=`",
@@ -246,4 +262,14 @@ impl fmt::Display for TokenKind {
 pub struct Token {
     pub kind: TokenKind,
     pub span: Span,
+}
+
+/// One piece of a template string.
+#[derive(Clone, Debug, PartialEq)]
+pub enum TemplatePiece {
+    /// Literal text, with escapes already applied.
+    Text(String),
+    /// The source between `${` and `}`, and its byte offset in the file, so
+    /// the parser can read it as an expression with correct positions.
+    Code { source: String, offset: usize },
 }

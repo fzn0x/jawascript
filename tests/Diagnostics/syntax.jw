@@ -9,10 +9,11 @@ gawe utama() {
     tulis(1
     ayo x = 1
 
-    // C-style logic is reported once; the rest of the line still parses.
-    // CHECK: error: unexpected `&`; use `lan` for logic
+    // There are no bitwise operators. A single `&` is reported once and the
+    // rest of the line still parses.
+    // CHECK: error: unexpected `&`; use `&&` or `lan` for logic
     // CHECK-NOT: error: expected `{`
-    yen x > 0 && x < 9 {
+    yen x > 0 & x < 9 {
         tulis(x)
     }
 
