@@ -3,7 +3,7 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py
   @ONLY)
 
-set(JAWA_TEST_DEPENDS jawa-opt)
+set(JAWA_TEST_DEPENDS jawa-opt jawac jawa_rt)
 
 # lit comes from `pip install lit`; scripts/test.sh sets up a virtualenv for it
 # in the build tree.

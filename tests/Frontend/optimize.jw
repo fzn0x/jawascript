@@ -1,0 +1,44 @@
+// RUN: jawac --emit=mlir-opt %s | FileCheck %s
+// RUN: jawac --emit=mlir-opt -O0 %s | FileCheck %s --check-prefix=O0
+
+// After optimization: constants folded across variables, string chains
+// fused into one concat, variables in SSA form, flat control flow, and
+// unused helpers dropped.
+
+gawe ora_dienggo() -> wilangan {
+    bali 1
+}
+
+gawe sapa(jeneng: ukara, umur: wilangan) -> ukara {
+    bali "jeneng: " + jeneng + ", umur: " + umur + "."
+}
+
+// CHECK-NOT: ora_dienggo
+// CHECK-LABEL: func.func private @sapa
+// CHECK-NOT: jawa.alloca
+// CHECK:   %[[N:.*]] = jawa.to_str %arg1 : i64
+// CHECK:   %[[S:.*]] = jawa.concat %{{.*}}, %arg0, %{{.*}}, %[[N]], %{{.*}}
+// CHECK:   return %[[S]] : !jawa.str
+
+// CHECK-LABEL: func.func @utama()
+// CHECK-NOT: jawa.alloca
+// CHECK-NOT: jawa.if
+// CHECK-DAG: jawa.str_const "rong puluh: 20"
+// CHECK-DAG: jawa.const 42 : i64
+// CHECK: cf.cond_br
+gawe utama() {
+    ayo a = 6
+    ayo b = a * 7
+    tulis(b)
+    tetep teks = "rong puluh: " + (b - 22)
+    tulis(teks)
+    kanggo i ing 0..3 {
+        tulis(sapa("Sri", i))
+    }
+}
+
+// Without optimization only the flattening runs.
+// O0-LABEL: func.func private @ora_dienggo
+// O0-LABEL: func.func @utama()
+// O0: jawa.alloca
+// O0: cf.cond_br

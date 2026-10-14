@@ -8,7 +8,7 @@ from lit.llvm import llvm_config
 
 config.name = "Jawa"
 config.test_format = lit.formats.ShTest(not llvm_config.use_lit_shell)
-config.suffixes = [".mlir", ".jw"]
+config.suffixes = [".mlir", ".jw", ".test"]
 config.excludes = ["Inputs", "CMakeLists.txt", "README.md", "lit.cfg.py", "lit.site.cfg.py"]
 
 config.test_source_root = os.path.dirname(__file__)
@@ -22,4 +22,6 @@ llvm_config.with_environment("PATH", config.llvm_tools_dir, append_path=True)
 llvm_config.with_environment("PATH", config.jawa_tools_dir, append_path=True)
 
 tool_dirs = [config.jawa_tools_dir, config.llvm_tools_dir]
-llvm_config.add_tool_substitutions(["jawa-opt"], tool_dirs)
+llvm_config.add_tool_substitutions(["jawa-opt", "jawac"], tool_dirs)
+
+config.substitutions.append(("%examples", os.path.join(config.jawa_src_root, "examples")))

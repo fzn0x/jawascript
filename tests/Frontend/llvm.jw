@@ -1,0 +1,20 @@
+// RUN: jawac --emit=mlir-llvm %s | FileCheck %s --check-prefix=MLIR
+// RUN: jawac --emit=llvm -O2 %s | FileCheck %s --check-prefix=IR
+
+// The LLVM dialect: functions renamed with `jw_`, runtime declarations.
+// MLIR: llvm.func @jawa_rt_print_int(i64)
+// MLIR: llvm.func internal @jw_tikel(%arg0: i64) -> i64
+// MLIR: llvm.func @jw_utama()
+
+// LLVM IR for the host, with the entry point exported for the runtime.
+// IR: target triple
+// IR: define {{.*}}void @jw_utama()
+// IR: call void @jawa_rt_print_int(i64 42)
+
+gawe tikel(n: wilangan) -> wilangan {
+    bali n * 2
+}
+
+gawe utama() {
+    tulis(tikel(21))
+}

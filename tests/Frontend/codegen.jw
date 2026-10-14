@@ -1,0 +1,102 @@
+// RUN: jawac --emit=mlir %s | FileCheck %s
+
+// The frontend's output: structured jawa ops, a stack slot per variable.
+
+// CHECK: jawa.struct @Titik {x: i64, y: i64}
+wujud Titik {
+    x: wilangan
+    y: wilangan
+}
+
+// Helpers are private so unused ones can be dropped; only utama is public.
+// CHECK-LABEL: func.func private @kuadrat(%arg0: i64) -> i64
+// CHECK:   %[[N:.*]] = jawa.alloca "n" : !jawa.ptr<i64>
+// CHECK:   jawa.store %arg0, %[[N]]
+// CHECK:   %[[V:.*]] = jawa.load %[[N]]
+// CHECK:   %[[R:.*]] = jawa.mul %[[V]], %{{.*}} : i64
+// CHECK:   jawa.return %[[R]] : i64
+gawe kuadrat(n: wilangan) -> wilangan {
+    bali n * n
+}
+
+// `yen` keeps its structure; `bali` inside it is a jawa.return.
+// CHECK-LABEL: func.func private @tandha(%arg0: i64) -> i64
+// CHECK:   jawa.if %{{.*}} {
+// CHECK:     jawa.return %{{.*}} : i64
+// CHECK:   } else {
+// CHECK:     jawa.if %{{.*}} {
+// CHECK:       jawa.return
+// CHECK:     }
+// CHECK:     jawa.yield
+// CHECK:   }
+// CHECK:   jawa.return
+gawe tandha(n: wilangan) -> wilangan {
+    yen n < 0 {
+        bali -1
+    } liyane yen n > 0 {
+        bali 1
+    }
+    bali 0
+}
+
+// CHECK-LABEL: func.func @utama()
+gawe utama() {
+    // Slots for every variable sit at the top of the function.
+    // CHECK-DAG: jawa.alloca "p" : !jawa.ptr<!jawa.struct<"Titik">>
+    // CHECK-DAG: jawa.alloca "i" : !jawa.ptr<i64>
+    // CHECK-DAG: jawa.alloca "indeks" : !jawa.ptr<i64>
+    // CHECK-DAG: jawa.alloca "x" : !jawa.ptr<i64>
+    // CHECK-DAG: jawa.alloca "lan" : !jawa.ptr<i1>
+
+    // CHECK: jawa.struct_new(%{{.*}}, %{{.*}}) : (i64, i64) -> !jawa.struct<"Titik">
+    ayo p = Titik { y: 2, x: 1 }
+    // CHECK: jawa.set_field %{{.*}}[0], %{{.*}} : !jawa.struct<"Titik">, i64
+    p.x += kuadrat(3)
+
+    // A range loop: condition, body, and a step that `terusna` jumps to.
+    // CHECK: jawa.for {
+    // CHECK:   jawa.cmp le
+    // CHECK:   jawa.condition
+    // CHECK: } do {
+    // CHECK:   jawa.continue
+    // CHECK: } step {
+    // CHECK:   jawa.add %{{.*}}, %{{.*}} : i64
+    // CHECK:   jawa.yield
+    // CHECK: }
+    kanggo i ing 1..=3 {
+        yen i == 2 {
+            terusna
+        }
+        tulis(i)
+    }
+
+    // Looping over an array re-reads its length each time round.
+    // CHECK: jawa.for {
+    // CHECK:   jawa.array_len
+    // CHECK:   jawa.condition
+    // CHECK: } do {
+    // CHECK:   jawa.array_get
+    kanggo x ing [10, 20] {
+        tulis(x)
+    }
+
+    // `lan` evaluates its right side only when the left is true.
+    // CHECK: %[[L:.*]] = jawa.cmp gt
+    // CHECK: jawa.store %[[L]], %[[TMP:.*]] : !jawa.ptr<i1>
+    // CHECK: jawa.if %[[L]] {
+    // CHECK:   func.call @tandha
+    // CHECK:   jawa.store %{{.*}}, %[[TMP]]
+    // CHECK: }
+    // CHECK: jawa.load %[[TMP]]
+    yen p.x > 0 lan tandha(p.y) == 1 {
+        tulis("loro-lorone positif")
+    }
+
+    // CHECK: jawa.while {
+    // CHECK:   jawa.condition
+    // CHECK: } do {
+    // CHECK:   jawa.break
+    sajrone bener {
+        mandheg
+    }
+}
