@@ -6,14 +6,14 @@ gawe kurang(a: wilangan, b: wilangan) -> wilangan {
 }
 
 gawe utama() {
-    // Integer division truncates toward zero; the remainder takes the sign
-    // of the dividend.
+    // Pambagian wilangan dibunderake menyang nol; turahe melu tandhane
+    // wilangan sing dibagi.
     // CHECK: 3 -3 -3 3
     tulis(7 / 2, -7 / 2, 7 / -2, -7 / -2)
     // CHECK-NEXT: 1 -1 1 -1
     tulis(7 % 3, -7 % 3, 7 % -3, -7 % -3)
 
-    // Integers wrap on overflow, and MIN / -1 wraps instead of trapping.
+    // Wilangan sing kebanjiran mubeng, lan MIN / -1 uga mubeng tanpa mandheg.
     ayo paling_gedhe = 9223372036854775807
     ayo paling_cilik = -9223372036854775808
     // CHECK-NEXT: -9223372036854775808 9223372036854775807
@@ -22,11 +22,11 @@ gawe utama() {
     // CHECK-NEXT: -9223372036854775808 0
     tulis(paling_cilik / min_siji, paling_cilik % min_siji)
 
-    // Precedence: * / % before + -, comparisons before ora, ora before lan.
+    // Urutan: * / % sadurunge + -, pambandhing sadurunge ora, ora sadurunge lan.
     // CHECK-NEXT: 14 20 bener salah
     tulis(2 + 3 * 4, (2 + 3) * 4, ora 1 > 2, ora bener lan bener)
 
-    // Floats follow IEEE 754.
+    // Pecahan manut IEEE 754.
     ayo nol = 0.0
     // CHECK-NEXT: 0.30000000000000004 inf -inf nan
     tulis(0.1 + 0.2, 1.0 / nol, -1.0 / nol, nol / nol)
@@ -35,11 +35,11 @@ gawe utama() {
     // CHECK-NEXT: salah bener
     tulis(nol / nol == nol / nol, nol / nol != nol / nol)
 
-    // Conversions.
+    // Ngowahi jinis.
     // CHECK-NEXT: 3 -3 9223372036854775807 0 1 7.0
     tulis(wilangan(3.99), wilangan(-3.99), wilangan(1e300), wilangan(nol / nol), wilangan(bener), pecahan(7))
 
-    // Compound assignment.
+    // Ngisi bareng operator.
     ayo x = 10
     x += 5
     x -= 3

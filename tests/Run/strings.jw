@@ -9,25 +9,25 @@ gawe utama() {
     // CHECK: sugeng enjing, Sri!
     tulis(sapa("Sri"))
 
-    // Text joins with numbers and booleans, converting them.
+    // Ukara bisa disambung karo wilangan lan logika, sing diowahi dadi ukara.
     // CHECK-NEXT: 1 + 1 = 2, bener, 2.5
     tulis("1 + 1 = " + (1 + 1) + ", " + bener + ", " + 2.5)
 
-    // Escapes.
-    // CHECK-NEXT: tab:	quote:" backslash:\ unicode:©
-    tulis("tab:\tquote:\" backslash:\\ unicode:\u{A9}")
+    // Aksara khusus.
+    // CHECK-NEXT: tab:	pethik:" garis_miring:\ unikode:©
+    tulis("tab:\tpethik:\" garis_miring:\\ unikode:\u{A9}")
 
-    // Length is in bytes; aksara Jawa takes three bytes a letter.
+    // Dawane diukur nganggo bita; saben aksara Jawa butuh telung bita.
     // CHECK-NEXT: 4 6 0
     tulis(dawane("Jawa"), dawane("ꦗꦮ"), dawane(""))
 
-    // Comparison is by bytes, and equality by content.
+    // Mbandhingake miturut bita, lan padha-orane miturut isine.
     ayo a = "pe"
     ayo b = a + "lem"
     // CHECK-NEXT: bener bener salah bener bener
     tulis(b == "pelem", "apel" < "jeruk", "b" < "a", "ab" < "abc", "" < "a")
 
-    // Building a string in a loop.
+    // Nggawe ukara ing puteran.
     ayo s = ""
     kanggo i ing 0..5 {
         s += ukara(i)
@@ -35,7 +35,7 @@ gawe utama() {
     // CHECK-NEXT: 01234
     tulis(s)
 
-    // Parsing numbers from text.
+    // Maca wilangan saka ukara.
     // CHECK-NEXT: 42 -7 2.5 1000.0
     tulis(wilangan(" 42 "), wilangan("-7"), pecahan("2.5"), pecahan("1e3"))
 }

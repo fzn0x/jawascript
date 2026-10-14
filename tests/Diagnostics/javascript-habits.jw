@@ -1,7 +1,8 @@
 // RUN: not jawac check %s 2>&1 | FileCheck %s --implicit-check-not=error:
 
-// Jawa's syntax follows JavaScript and TypeScript, but its words are
-// Javanese; a JavaScript keyword gets one error that names the Jawa word.
+// Tata tulise Jawa niru JavaScript lan TypeScript, nanging tembunge basa
+// Jawa; tembung kunci JavaScript entuk siji kesalahan sing nyebutake tembung
+// Jawane.
 
 // CHECK: error: expected `gawe` or `wujud`, found identifier `function`
 // CHECK: = note: Jawa writes `function` as `gawe`

@@ -1,9 +1,9 @@
 // RUN: jawac --emit=mlir-opt %s | FileCheck %s
 // RUN: jawac --emit=mlir-opt -O0 %s | FileCheck %s --check-prefix=O0
 
-// After optimization: constants folded across variables, string chains
-// fused into one concat, variables in SSA form, flat control flow, and
-// unused helpers dropped.
+// Sawise dioptimasi: konstanta dilempit nembus variabel, rerantening ukara
+// digabung dadi siji concat, variabel awujud SSA, aliran kendhali rata, lan
+// fungsi pambiyantu sing ora dienggo dibuwang.
 
 gawe ora_dienggo() -> wilangan {
     bali 1
@@ -37,7 +37,7 @@ gawe utama() {
     }
 }
 
-// Without optimization only the flattening runs.
+// Tanpa optimasi mung pangratan sing mlaku.
 // O0-LABEL: func.func private @ora_dienggo
 // O0-LABEL: func.func @utama()
 // O0: jawa.alloca

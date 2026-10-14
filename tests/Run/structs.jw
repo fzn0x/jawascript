@@ -32,7 +32,7 @@ gawe utama() {
     // CHECK-NEXT: bener bener salah
     tulis(sri.pasangan.pasangan == sri, joko.kanca[0] == sri, sri == joko)
 
-    // `kosong` compares equal only to itself.
+    // `kosong` mung padha karo `kosong` dhewe.
     ayo ora_ana: Wong = kosong
     // CHECK-NEXT: bener salah
     tulis(ora_ana == kosong, sri == kosong)

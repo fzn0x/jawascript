@@ -1,12 +1,12 @@
 // RUN: jawac --emit=mlir-llvm %s | FileCheck %s --check-prefix=MLIR
 // RUN: jawac --emit=llvm -O2 %s | FileCheck %s --check-prefix=IR
 
-// The LLVM dialect: functions renamed with `jw_`, runtime declarations.
+// Dialek LLVM: jeneng fungsi diwenehi `jw_`, lan deklarasi runtime.
 // MLIR: llvm.func @jawa_rt_print_int(i64)
 // MLIR: llvm.func internal @jw_tikel(%arg0: i64) -> i64
 // MLIR: llvm.func @jw_utama()
 
-// LLVM IR for the host, with the entry point exported for the runtime.
+// LLVM IR kanggo mesin iki, lawang mlebune diekspor kanggo runtime.
 // IR: target triple
 // IR: define {{.*}}void @jw_utama()
 // IR: call void @jawa_rt_print_int(i64 42)

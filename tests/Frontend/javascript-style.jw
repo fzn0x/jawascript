@@ -1,8 +1,8 @@
 // RUN: jawac --emit=mlir %s | FileCheck %s
 // RUN: jawac --emit=mlir-opt %s | FileCheck %s --check-prefix=OPT
 
-// A `kanggo (init; cond; update)` loop is a jawa.for whose step region holds
-// the update, so `terusna` still runs it.
+// Puteran `kanggo (wiwitan; syarat; pangowah)` dadi jawa.for sing region
+// step-e ngemot pangowahe, mula `terusna` tetep nglakokake.
 // CHECK-LABEL: func.func @utama()
 // CHECK:   %[[I:.*]] = jawa.alloca "i" : !jawa.ptr<i64>
 // CHECK:   jawa.store %{{.*}}, %[[I]]
@@ -18,8 +18,8 @@
 // CHECK:     jawa.yield
 // CHECK:   }
 
-// A template string is a chain of concatenations, which jawa-fuse-concat
-// turns into a single allocation.
+// Ukara cithakan iku rerantening sambungan, sing didadekake siji alokasi
+// dening jawa-fuse-concat.
 // OPT-LABEL: func.func @utama()
 // OPT:   %[[N:.*]] = jawa.to_str %{{.*}} : i64
 // OPT:   %[[S:.*]] = jawa.concat %{{.*}}, %[[N]], %{{.*}}

@@ -1,40 +1,40 @@
 // RUN: jawac run -O0 %s | FileCheck %s
 // RUN: jawac run -O2 %s | FileCheck %s
 
-gawe jumlah(xs: [wilangan]) -> wilangan {
-    ayo total = 0
-    kanggo x ing xs {
-        total += x
+gawe gunggung(larik: [wilangan]) -> wilangan {
+    ayo asil = 0
+    kanggo x ing larik {
+        asil += x
     }
-    bali total
+    bali asil
 }
 
 gawe utama() {
-    ayo xs = [3, 1, 2]
+    ayo larik = [3, 1, 2]
     // CHECK: [3, 1, 2] 3 6
-    tulis(xs, dawane(xs), jumlah(xs))
+    tulis(larik, dawane(larik), gunggung(larik))
 
-    xs[1] = 10
-    xs[0] += 1
-    tambah(xs, 5)
+    larik[1] = 10
+    larik[0] += 1
+    tambah(larik, 5)
     // CHECK-NEXT: [4, 10, 2, 5] 4
-    tulis(xs, dawane(xs))
+    tulis(larik, dawane(larik))
 
-    // Arrays grow past their first capacity.
+    // Larik bisa mundhak ngluwihi wadhah wiwitane.
     ayo gedhe: [wilangan] = []
     kanggo i ing 0..1000 {
         tambah(gedhe, i)
     }
     // CHECK-NEXT: 1000 999 499500
-    tulis(dawane(gedhe), gedhe[999], jumlah(gedhe))
+    tulis(dawane(gedhe), gedhe[999], gunggung(gedhe))
 
-    // Arrays are references.
-    ayo kanca = xs
+    // Larik iku referensi.
+    ayo kanca = larik
     kanca[0] = 99
     // CHECK-NEXT: 99
-    tulis(xs[0])
+    tulis(larik[0])
 
-    // A loop over an array sees elements appended while it runs.
+    // Puteran ing larik weruh isi sing ditambahake nalika lagi mlaku.
     ayo antrian = [1]
     kanggo x ing antrian {
         yen x < 4 {
@@ -44,12 +44,12 @@ gawe utama() {
     // CHECK-NEXT: [1, 2, 3, 4]
     tulis(antrian)
 
-    // Every printable element type, and arrays of arrays.
+    // Saben jinis isi sing bisa ditulis, lan larik isi larik.
     // CHECK-NEXT: [1.5, 2.0] [bener, salah] ["a", "b\"c"] []
     ayo kosongan: [ukara] = []
     tulis([1.5, 2], [bener, salah], ["a", "b\"c"], kosongan)
-    ayo grid = [[1, 2], [3, 4]]
-    grid[1][0] = 30
+    ayo kothak = [[1, 2], [3, 4]]
+    kothak[1][0] = 30
     // CHECK-NEXT: [30, 4] 2
-    tulis(grid[1], dawane(grid))
+    tulis(kothak[1], dawane(kothak))
 }

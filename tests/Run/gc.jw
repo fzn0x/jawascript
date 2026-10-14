@@ -1,8 +1,8 @@
 // RUN: jawac run %s | FileCheck %s
 
-// Allocates about a gigabyte in total, almost all of it garbage straight
-// away. Without a collector this would run out of memory; with bdwgc the
-// live heap stays small.
+// Nyadhiyakake memori kira-kira sak gigabita, meh kabeh langsung dadi
+// sampah. Tanpa pangumpul sampah memorine bakal entek; nganggo bdwgc
+// memori sing isih urip tetep cilik.
 
 wujud Simpul {
     regane: wilangan
@@ -12,7 +12,7 @@ wujud Simpul {
 gawe utama() {
     ayo dawa = 0
     kanggo i ing 0..100000 {
-        // A 6 KB string, dropped on the next iteration.
+        // Ukara 6 KB, dibuwang ing puteran sabanjure.
         ayo s = "sampah"
         kanggo j ing 0..10 {
             s = s + s
@@ -22,8 +22,8 @@ gawe utama() {
     // CHECK: 6144
     tulis(dawa)
 
-    // A long list survives while it is reachable, then becomes garbage.
-    ayo total = 0
+    // Dhaptar dawa tetep urip sajrone isih bisa digayuh, banjur dadi sampah.
+    ayo gunggung = 0
     kanggo putaran ing 0..20 {
         ayo dhaptar: Simpul = kosong
         kanggo i ing 0..100000 {
@@ -31,10 +31,10 @@ gawe utama() {
         }
         ayo n = dhaptar
         sajrone n != kosong {
-            total += n.regane
+            gunggung += n.regane
             n = n.sabanjure
         }
     }
     // CHECK-NEXT: 99999000000
-    tulis(total)
+    tulis(gunggung)
 }

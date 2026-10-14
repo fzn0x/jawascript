@@ -2,13 +2,13 @@
 // RUN: jawac run -O2 %s | FileCheck %s
 
 gawe dicathet(teks: ukara, asil: logika) -> logika {
-    tulis("  evaluated", teks)
+    tulis("  dietung", teks)
     bali asil
 }
 
-gawe golek(xs: [wilangan], target: wilangan) -> wilangan {
-    kanggo i ing 0..dawane(xs) {
-        yen xs[i] == target {
+gawe golek(larik: [wilangan], sing_digoleki: wilangan) -> wilangan {
+    kanggo i ing 0..dawane(larik) {
+        yen larik[i] == sing_digoleki {
             bali i
         }
     }
@@ -16,16 +16,16 @@ gawe golek(xs: [wilangan], target: wilangan) -> wilangan {
 }
 
 gawe utama() {
-    // `lan` and `utawa` skip their right side when the left decides.
+    // `lan` lan `utawa` ora ngetung sisih tengen yen sisih kiwa wis nemtokake.
     // CHECK: salah
-    // CHECK-NOT: evaluated
+    // CHECK-NOT: dietung
     tulis(salah lan dicathet("tengen", bener))
-    // CHECK: evaluated kiwa
+    // CHECK: dietung kiwa
     // CHECK-NEXT: bener
     tulis(dicathet("kiwa", bener) utawa dicathet("tengen", salah))
 
-    // `mandheg` and `terusna` affect only the innermost loop, and
-    // `terusna` in a `kanggo` still advances the counter.
+    // `mandheg` lan `terusna` mung ngenani puteran sing paling jero, lan
+    // `terusna` ing `kanggo` tetep nambah pangetunge.
     ayo pasangan = ""
     kanggo i ing 0..4 {
         kanggo j ing 0..4 {
@@ -41,11 +41,11 @@ gawe utama() {
     // CHECK: 01 02 10 12 20 21 30 31 32
     tulis(pasangan)
 
-    // `bali` from deep inside loops.
+    // `bali` saka jero puteran.
     // CHECK-NEXT: 2 -1
     tulis(golek([5, 7, 9], 9), golek([5, 7, 9], 4))
 
-    // `sajrone` with an early exit.
+    // `sajrone` sing mandheg luwih dhisik.
     ayo n = 0
     sajrone bener {
         n += 1
@@ -56,7 +56,7 @@ gawe utama() {
     // CHECK-NEXT: 8
     tulis(n)
 
-    // Inclusive and empty ranges.
+    // Rentang sing nglebokake pungkasane, lan rentang kosong.
     ayo hitungan = 0
     kanggo i ing 1..=3 {
         hitungan += i
@@ -67,13 +67,13 @@ gawe utama() {
     // CHECK-NEXT: 6
     tulis(hitungan)
 
-    // Shadowing in a nested block.
+    // Jeneng sing nutupi jeneng liya ing blok jero.
     ayo x = 1
     {
-        ayo x = "inner"
+        ayo x = "jero"
         tulis(x)
     }
-    // CHECK-NEXT: inner
+    // CHECK-NEXT: jero
     // CHECK-NEXT: 1
     tulis(x)
 }

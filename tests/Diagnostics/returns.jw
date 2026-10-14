@@ -1,6 +1,6 @@
 // RUN: not jawac check %s 2>&1 | FileCheck %s --implicit-check-not=error:
 
-// A function with a result type must return on every path.
+// Fungsi sing duwe jinis asil kudu `bali` ing saben dalan.
 
 // CHECK: error: `tandha` can reach its end without returning a `wilangan`
 // CHECK: = note: add a `bali` with a value on every path
@@ -12,7 +12,7 @@ gawe tandha(n: wilangan) -> wilangan {
     }
 }
 
-// Every branch returning, or a loop that never ends, is fine.
+// Saben cabang sing `bali`, utawa puteran sing ora tau rampung, ora apa-apa.
 gawe mutlak(n: wilangan) -> wilangan {
     yen n < 0 {
         bali -n

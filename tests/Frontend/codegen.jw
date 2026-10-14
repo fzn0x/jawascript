@@ -1,6 +1,6 @@
 // RUN: jawac --emit=mlir %s | FileCheck %s
 
-// The frontend's output: structured jawa ops, a stack slot per variable.
+// Asile frontend: op jawa sing isih mawa struktur, siji slot tumpukan saben variabel.
 
 // CHECK: jawa.struct @Titik {x: i64, y: i64}
 wujud Titik {
@@ -8,7 +8,7 @@ wujud Titik {
     y: wilangan
 }
 
-// Helpers are private so unused ones can be dropped; only utama is public.
+// Fungsi pambiyantu iku pribadi supaya sing ora dienggo bisa dibuwang; mung utama sing umum.
 // CHECK-LABEL: func.func private @kuadrat(%arg0: i64) -> i64
 // CHECK:   %[[N:.*]] = jawa.alloca "n" : !jawa.ptr<i64>
 // CHECK:   jawa.store %arg0, %[[N]]
@@ -19,7 +19,7 @@ gawe kuadrat(n: wilangan) -> wilangan {
     bali n * n
 }
 
-// `yen` keeps its structure; `bali` inside it is a jawa.return.
+// `yen` tetep mawa struktur; `bali` ing njerone dadi jawa.return.
 // CHECK-LABEL: func.func private @tandha(%arg0: i64) -> i64
 // CHECK:   jawa.if %{{.*}} {
 // CHECK:     jawa.return %{{.*}} : i64
@@ -41,7 +41,7 @@ gawe tandha(n: wilangan) -> wilangan {
 
 // CHECK-LABEL: func.func @utama()
 gawe utama() {
-    // Slots for every variable sit at the top of the function.
+    // Slot kanggo saben variabel ana ing pucuke fungsi.
     // CHECK-DAG: jawa.alloca "p" : !jawa.ptr<!jawa.struct<"Titik">>
     // CHECK-DAG: jawa.alloca "i" : !jawa.ptr<i64>
     // CHECK-DAG: jawa.alloca "indeks" : !jawa.ptr<i64>
@@ -53,7 +53,7 @@ gawe utama() {
     // CHECK: jawa.set_field %{{.*}}[0], %{{.*}} : !jawa.struct<"Titik">, i64
     p.x += kuadrat(3)
 
-    // A range loop: condition, body, and a step that `terusna` jumps to.
+    // Puteran rentang: syarat, awak, lan langkah sing dituju `terusna`.
     // CHECK: jawa.for {
     // CHECK:   jawa.cmp le
     // CHECK:   jawa.condition
@@ -70,7 +70,7 @@ gawe utama() {
         tulis(i)
     }
 
-    // Looping over an array re-reads its length each time round.
+    // Puteran ing larik maca dawane maneh saben ngubeng.
     // CHECK: jawa.for {
     // CHECK:   jawa.array_len
     // CHECK:   jawa.condition
@@ -80,7 +80,7 @@ gawe utama() {
         tulis(x)
     }
 
-    // `lan` evaluates its right side only when the left is true.
+    // `lan` mung ngetung sisih tengen yen sisih kiwa bener.
     // CHECK: %[[L:.*]] = jawa.cmp gt
     // CHECK: jawa.store %[[L]], %[[TMP:.*]] : !jawa.ptr<i1>
     // CHECK: jawa.if %[[L]] {
