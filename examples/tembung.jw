@@ -1,0 +1,28 @@
+// Working with text (ukara): joining, comparing, converting and measuring.
+
+gawe baleni(teks: ukara, kaping: wilangan) -> ukara {
+    ayo asil = ""
+    kanggo i ing 0..kaping {
+        asil += teks
+    }
+    bali asil
+}
+
+gawe utama() {
+    tetep jeneng = "Sri"
+    tetep umur = 20
+    tetep dhuwur = 1.62
+
+    // `+` joins text with numbers and booleans, converting them for you.
+    tulis("Jenengku " + jeneng + ", umurku " + umur + ", dhuwurku " + dhuwur + " meter.")
+    tulis("Wis diwasa? " + (umur >= 18))
+
+    // Converting explicitly: ukara(x), wilangan(x), pecahan(x).
+    tetep teks = ukara(umur * 2)
+    tulis(teks, dawane(teks), wilangan("  42 ") + 1, pecahan("2.5") * 2)
+
+    // Strings compare by their bytes.
+    tulis("apel" < "jeruk", "pelem" == "pe" + "lem", "Jawa" != "jawa")
+
+    tulis(baleni("ha", 3) + "!")
+}
