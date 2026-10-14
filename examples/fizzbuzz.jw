@@ -1,0 +1,16 @@
+// FizzBuzz played on a gamelan: multiples of 3 strike the gong, multiples
+// of 5 the kendhang (drum), and multiples of both strike both.
+
+gawe utama() {
+    kanggo n ing 1..=20 {
+        yen n % 15 == 0 {
+            tulis("Gong Kendhang")
+        } liyane yen n % 3 == 0 {
+            tulis("Gong")
+        } liyane yen n % 5 == 0 {
+            tulis("Kendhang")
+        } liyane {
+            tulis(n)
+        }
+    }
+}

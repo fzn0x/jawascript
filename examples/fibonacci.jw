@@ -1,0 +1,28 @@
+// The Fibonacci numbers, two ways.
+
+// Recursive: fib(n) = fib(n - 1) + fib(n - 2).
+gawe fib(n: wilangan) -> wilangan {
+    yen n < 2 {
+        bali n
+    }
+    bali fib(n - 1) + fib(n - 2)
+}
+
+// Iterative, collecting the sequence in an array ("larik").
+gawe larik_fib(cacah: wilangan) -> [wilangan] {
+    ayo asil: [wilangan] = []
+    ayo a = 0
+    ayo b = 1
+    kanggo i ing 0..cacah {
+        tambah(asil, a)
+        tetep sabanjure = a + b
+        a = b
+        b = sabanjure
+    }
+    bali asil
+}
+
+gawe utama() {
+    tulis("fib(30) =", fib(30))
+    tulis("20 angka kapisan:", larik_fib(20))
+}
