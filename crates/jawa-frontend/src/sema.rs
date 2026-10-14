@@ -221,15 +221,9 @@ impl Checker {
                 if self.struct_index.contains_key(name) {
                     Ty::Struct(name.clone())
                 } else {
-                    let message = format!("unknown type `{name}`");
-                    match suggest(name, self.struct_index.keys().map(String::as_str)) {
-                        Some(similar) => self.error_with_note(
-                            ty.span,
-                            message,
-                            format!("did you mean `{similar}`?"),
-                        ),
-                        None => self.error(ty.span, message),
-                    }
+                    let similar = suggest(name, self.struct_index.keys().map(String::as_str))
+                        .map(str::to_string);
+                    self.unknown_name(ty.span, format!("unknown type `{name}`"), name, similar);
                     Ty::Error
                 }
             }
@@ -378,6 +372,28 @@ impl Checker {
                 StmtKind::While { cond, body }
             }
             ast::StmtKind::For { var, iter, body } => self.for_stmt(var, iter, body),
+            ast::StmtKind::ForC {
+                init,
+                cond,
+                update,
+                body,
+            } => {
+                // The header's variables belong to the loop.
+                self.scopes.push(HashMap::new());
+                let init = init.as_deref().map(|init| Box::new(self.stmt(init)));
+                let cond = cond
+                    .as_ref()
+                    .map(|cond| self.check_against(cond, &Ty::Bool, "for the loop condition"));
+                let body = self.loop_body(body);
+                let update = update.as_deref().map(|update| Box::new(self.stmt(update)));
+                self.scopes.pop();
+                StmtKind::ForC {
+                    init,
+                    cond,
+                    update,
+                    body,
+                }
+            }
             ast::StmtKind::Return(value) => self.return_stmt(stmt.span, value.as_ref()),
             ast::StmtKind::Break | ast::StmtKind::Continue => {
                 let is_break = matches!(stmt.kind, ast::StmtKind::Break);
@@ -617,6 +633,7 @@ impl Checker {
             },
             ast::ExprKind::Float(value) => expr(ExprKind::Float(*value), Ty::Float, span),
             ast::ExprKind::Str(value) => expr(ExprKind::Str(value.clone()), Ty::Str, span),
+            ast::ExprKind::Template(parts) => self.template(parts, span),
             ast::ExprKind::Bool(value) => expr(ExprKind::Bool(*value), Ty::Bool, span),
             ast::ExprKind::Null => {
                 let ty = match expected {
@@ -676,11 +693,16 @@ impl Checker {
 
     fn unknown_variable(&mut self, name: &str, span: Span) {
         let names = self.visible_names();
-        let message = format!("unknown variable `{name}`");
-        match suggest(name, names.iter().map(String::as_str)) {
-            Some(similar) => {
-                self.error_with_note(span, message, format!("did you mean `{similar}`?"))
-            }
+        let similar = suggest(name, names.iter().map(String::as_str)).map(str::to_string);
+        self.unknown_name(span, format!("unknown variable `{name}`"), name, similar);
+    }
+
+    /// Reports an unknown name, with the closest known name if there is one.
+    fn unknown_name(&mut self, span: Span, message: String, name: &str, similar: Option<String>) {
+        let _ = name;
+        let note = similar.map(|similar| format!("did you mean `{similar}`?"));
+        match note {
+            Some(note) => self.error_with_note(span, message, note),
             None => self.error(span, message),
         }
     }
@@ -835,6 +857,45 @@ impl Checker {
         }
     }
 
+    /// `` `fib(${i}) = ${fib(i)}` `` becomes `"fib(" + ukara(i) + ") = " +
+    /// ukara(fib(i))`; jawa-fuse-concat later turns the chain into a single
+    /// allocation.
+    fn template(&mut self, parts: &[ast::TemplatePart], span: Span) -> Expr {
+        let mut result: Option<Expr> = None;
+        for part in parts {
+            let piece = match part {
+                ast::TemplatePart::Text(text) => expr(ExprKind::Str(text.clone()), Ty::Str, span),
+                ast::TemplatePart::Expr(value) => {
+                    let value = self.expr(value, None);
+                    match value.ty {
+                        Ty::Str | Ty::Error => value,
+                        Ty::Int | Ty::Float | Ty::Bool => {
+                            let value_span = value.span;
+                            expr(ExprKind::ToStr(Box::new(value)), Ty::Str, value_span)
+                        }
+                        ref other => {
+                            self.error_with_note(
+                                value.span,
+                                format!("cannot put `{other}` in a template string"),
+                                "only numbers, `logika` and `ukara` turn into text",
+                            );
+                            error_expr(value.span)
+                        }
+                    }
+                }
+            };
+            result = Some(match result {
+                None => piece,
+                Some(text) => expr(
+                    ExprKind::Concat(Box::new(text), Box::new(piece)),
+                    Ty::Str,
+                    span,
+                ),
+            });
+        }
+        result.unwrap_or_else(|| expr(ExprKind::Str(String::new()), Ty::Str, span))
+    }
+
     fn call(&mut self, callee: &ast::Ident, args: &[ast::Expr], span: Span) -> Expr {
         let name = &callee.name;
         if let Some(signature) = self.functions.get(name) {
@@ -885,13 +946,13 @@ impl Checker {
         } else {
             let mut candidates: Vec<&str> = self.functions.keys().map(String::as_str).collect();
             candidates.extend(["tulis", "dawane", "tambah", "gagal"]);
-            let message = format!("unknown function `{name}`");
-            match suggest(name, candidates.into_iter()) {
-                Some(similar) => {
-                    self.error_with_note(callee.span, message, format!("did you mean `{similar}`?"))
-                }
-                None => self.error(callee.span, message),
-            }
+            let similar = suggest(name, candidates.into_iter()).map(str::to_string);
+            self.unknown_name(
+                callee.span,
+                format!("unknown function `{name}`"),
+                name,
+                similar,
+            );
         }
         for arg in args {
             self.expr(arg, None);
@@ -1264,6 +1325,11 @@ pub fn stmt_terminates(stmt: &Stmt) -> bool {
         StmtKind::While { cond, body } => {
             matches!(cond.kind, ExprKind::Bool(true)) && !breaks_out(body)
         }
+        StmtKind::ForC { cond, body, .. } => {
+            cond.as_ref()
+                .map_or(true, |cond| matches!(cond.kind, ExprKind::Bool(true)))
+                && !breaks_out(body)
+        }
         _ => false,
     }
 }
@@ -1518,6 +1584,53 @@ mod tests {
             ["cannot tell the element type of an empty array"]
         );
         ok(&in_utama("ayo xs: [wilangan] = []\ntambah(xs, 1)"));
+    }
+
+    #[test]
+    fn template_strings_join_their_parts() {
+        let program = ok(&in_utama(
+            "ayo s = `n=${1} x=${2.5} ok=${bener} ${\"teks\"}`",
+        ));
+        let StmtKind::Let { init, .. } = &program.functions[0].body.stmts[0].kind else {
+            panic!()
+        };
+        assert_eq!(init.ty, Ty::Str);
+        // Left-leaning: ((((("n=" + 1) + " x=") + 2.5) …
+        let ExprKind::Concat(_, last) = &init.kind else {
+            panic!("expected a concat, got {:?}", init.kind)
+        };
+        assert!(matches!(last.kind, ExprKind::Str(ref s) if s == "teks"));
+        assert_eq!(
+            messages(&format!(
+                "wujud Titik {{ x: wilangan }}\n{}",
+                in_utama("tulis(`${Titik { x: 1 }}`)")
+            )),
+            ["cannot put `Titik` in a template string"]
+        );
+    }
+
+    #[test]
+    fn javascript_style_loops() {
+        // The header's variable belongs to the loop.
+        assert_eq!(
+            messages(&in_utama("kanggo (ayo i = 0; i < 3; i++) {}\ntulis(i)")),
+            ["unknown variable `i`"]
+        );
+        // `tetep` in the header cannot be incremented.
+        assert_eq!(
+            messages(&in_utama("kanggo (tetep i = 0; i < 3; i++) {}")),
+            ["cannot assign to `i`, it does not change"]
+        );
+        assert_eq!(
+            messages(&in_utama("kanggo (ayo i = 0; i; i++) {}")),
+            ["expected `logika` for the loop condition, found `wilangan`"]
+        );
+        // A loop without a condition or `mandheg` never ends.
+        ok("gawe f(): wilangan { kanggo (;;) { bali 1 } }\ngawe utama() {}");
+        assert_eq!(
+            messages("gawe f(): wilangan { kanggo (;;) { mandheg } }\ngawe utama() {}"),
+            ["`f` can reach its end without returning a `wilangan`"]
+        );
     }
 
     #[test]

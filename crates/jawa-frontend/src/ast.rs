@@ -108,10 +108,19 @@ pub enum StmtKind {
         cond: Expr,
         body: Block,
     },
-    /// `kanggo var ing iter { … }`
+    /// `kanggo var ing iter { … }`, or `kanggo (tetep var ing iter) { … }`
     For {
         var: Ident,
         iter: ForIter,
+        body: Block,
+    },
+    /// The JavaScript-style loop `kanggo (init; cond; update) { … }`. Each
+    /// part may be left out; without a condition the loop runs until
+    /// `mandheg` or `bali`.
+    ForC {
+        init: Option<Box<Stmt>>,
+        cond: Option<Expr>,
+        update: Option<Box<Stmt>>,
         body: Block,
     },
     /// `bali value`
@@ -153,6 +162,8 @@ pub enum ExprKind {
     Int(u64),
     Float(f64),
     Str(String),
+    /// `` `text ${expr} text` ``
+    Template(Vec<TemplatePart>),
     Bool(bool),
     /// `kosong`
     Null,
@@ -192,6 +203,12 @@ pub enum ExprKind {
         base: Box<Expr>,
         field: Ident,
     },
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum TemplatePart {
+    Text(String),
+    Expr(Expr),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

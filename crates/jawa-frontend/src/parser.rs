@@ -24,7 +24,7 @@ use crate::ast::*;
 use crate::diag::Diagnostic;
 use crate::lexer;
 use crate::source::Span;
-use crate::token::{Token, TokenKind};
+use crate::token::{TemplatePiece, Token, TokenKind};
 
 pub struct Parsed {
     pub program: Program,
@@ -116,12 +116,20 @@ impl Parser {
 
     fn expect(&mut self, kind: &TokenKind, context: &str) -> PResult<Token> {
         if self.at(kind) {
-            Ok(self.advance())
-        } else {
-            let found = self.peek().clone();
-            self.error_here(format!("expected {kind} {context}, found {found}"));
-            Err(())
+            return Ok(self.advance());
         }
+        let found = self.peek().clone();
+        let mut diag = Diagnostic::error(
+            self.span(),
+            format!("expected {kind} {context}, found {found}"),
+        );
+        if matches!(found, TokenKind::PlusPlus | TokenKind::MinusMinus) {
+            diag = diag.with_note(format!(
+                "{found} only works as a statement of its own, such as `i++`"
+            ));
+        }
+        self.diagnostics.push(diag);
+        Err(())
     }
 
     fn ident(&mut self, context: &str) -> PResult<Ident> {
@@ -237,7 +245,8 @@ impl Parser {
             }
         }
         self.expect(&TokenKind::RParen, "to close the parameter list")?;
-        let ret = if self.eat(&TokenKind::Arrow) {
+        // `: wilangan`, as in TypeScript, or `-> wilangan`.
+        let ret = if self.eat(&TokenKind::Colon) || self.eat(&TokenKind::Arrow) {
             Some(self.type_expr()?)
         } else {
             None
@@ -298,7 +307,23 @@ impl Parser {
         result
     }
 
+    /// A type, with any number of `[]` after it: `wilangan[]` is an array of
+    /// `wilangan`, as in TypeScript, and so is `[wilangan]`.
     fn type_expr_inner(&mut self) -> PResult<TypeExpr> {
+        let start = self.span();
+        let mut ty = self.base_type()?;
+        while self.at(&TokenKind::LBracket) && self.peek_at(1) == &TokenKind::RBracket {
+            self.advance();
+            self.advance();
+            ty = TypeExpr {
+                kind: TypeExprKind::Array(Box::new(ty)),
+                span: start.to(self.prev_span()),
+            };
+        }
+        Ok(ty)
+    }
+
+    fn base_type(&mut self) -> PResult<TypeExpr> {
         let start = self.span();
         let kind = match self.peek().clone() {
             TokenKind::Wilangan => TypeExprKind::Wilangan,
@@ -497,6 +522,13 @@ impl Parser {
     }
 
     fn let_stmt(&mut self) -> PResult<Stmt> {
+        let stmt = self.let_decl()?;
+        self.terminator()?;
+        Ok(stmt)
+    }
+
+    /// `ayo name: type = value`, without its terminator.
+    fn let_decl(&mut self) -> PResult<Stmt> {
         let keyword = self.advance();
         let mutable = keyword.kind == TokenKind::Ayo;
         let name = self.ident(if mutable {
@@ -525,7 +557,6 @@ impl Parser {
         self.advance();
         let init = self.expr()?;
         let span = keyword.span.to(self.prev_span());
-        self.terminator()?;
         Ok(Stmt {
             kind: StmtKind::Let {
                 name,
@@ -564,9 +595,26 @@ impl Parser {
         })
     }
 
+    /// `kanggo x ing xs { … }`, `kanggo i ing 0..10 { … }`, and the
+    /// JavaScript-style `kanggo (tetep x ing xs) { … }` and
+    /// `kanggo (ayo i = 0; i < 10; i++) { … }`.
     fn for_stmt(&mut self) -> PResult<Stmt> {
         let start = self.advance().span;
+        if self.at(&TokenKind::LParen) {
+            return self.parenthesized_for(start);
+        }
         let var = self.ident("after `kanggo`")?;
+        let iter = self.for_in(&var, false)?;
+        let body = self.block()?;
+        Ok(Stmt {
+            kind: StmtKind::For { var, iter, body },
+            span: start.to(self.prev_span()),
+        })
+    }
+
+    /// The part of a `kanggo` loop after its variable: `ing start..end` or
+    /// `ing array`.
+    fn for_in(&mut self, var: &Ident, in_parentheses: bool) -> PResult<ForIter> {
         if !self.at(&TokenKind::Ing) {
             let found = self.peek().clone();
             let diag = Diagnostic::error(
@@ -581,27 +629,119 @@ impl Parser {
             return Err(());
         }
         self.advance();
-        let first = self.header_expr()?;
-        let iter = if matches!(self.peek(), TokenKind::DotDot | TokenKind::DotDotEq) {
-            let inclusive = self.advance().kind == TokenKind::DotDotEq;
-            let end = self.header_expr()?;
-            ForIter::Range {
-                start: first,
-                end,
-                inclusive,
+        let part = |parser: &mut Self| {
+            if in_parentheses {
+                parser.nested_expr()
+            } else {
+                parser.header_expr()
             }
-        } else {
-            ForIter::Each(first)
         };
+        let first = part(self)?;
+        Ok(
+            if matches!(self.peek(), TokenKind::DotDot | TokenKind::DotDotEq) {
+                let inclusive = self.advance().kind == TokenKind::DotDotEq;
+                let end = part(self)?;
+                ForIter::Range {
+                    start: first,
+                    end,
+                    inclusive,
+                }
+            } else {
+                ForIter::Each(first)
+            },
+        )
+    }
+
+    fn parenthesized_for(&mut self, start: Span) -> PResult<Stmt> {
+        // `(x ing …` or `(tetep x ing …` loops over something; anything else
+        // is `(init; condition; update)`.
+        let over = matches!(
+            (self.peek_at(1), self.peek_at(2)),
+            (TokenKind::Ident(_), TokenKind::Ing)
+        ) || (matches!(self.peek_at(1), TokenKind::Ayo | TokenKind::Tetep)
+            && matches!(self.peek_at(2), TokenKind::Ident(_))
+            && self.peek_at(3) == &TokenKind::Ing);
+        self.advance();
+
+        if over {
+            if matches!(self.peek(), TokenKind::Ayo | TokenKind::Tetep) {
+                self.advance();
+            }
+            let var = self.ident("for the loop variable")?;
+            let iter = self.for_in(&var, true)?;
+            self.expect(&TokenKind::RParen, "to close the loop header")?;
+            let body = self.block()?;
+            return Ok(Stmt {
+                kind: StmtKind::For { var, iter, body },
+                span: start.to(self.prev_span()),
+            });
+        }
+
+        let init = if self.at(&TokenKind::Semi) {
+            None
+        } else if matches!(self.peek(), TokenKind::Ayo | TokenKind::Tetep) {
+            Some(Box::new(self.let_decl()?))
+        } else {
+            Some(Box::new(self.simple_stmt()?))
+        };
+        self.expect_loop_semicolon("after the loop's first part")?;
+        let cond = if self.at(&TokenKind::Semi) {
+            None
+        } else {
+            Some(self.nested_expr()?)
+        };
+        self.expect_loop_semicolon("after the loop condition")?;
+        let update = if self.at(&TokenKind::RParen) {
+            None
+        } else {
+            Some(Box::new(self.simple_stmt()?))
+        };
+        self.expect(&TokenKind::RParen, "to close the loop header")?;
         let body = self.block()?;
         Ok(Stmt {
-            kind: StmtKind::For { var, iter, body },
+            kind: StmtKind::ForC {
+                init,
+                cond,
+                update,
+                body,
+            },
             span: start.to(self.prev_span()),
         })
     }
 
+    fn expect_loop_semicolon(&mut self, context: &str) -> PResult<()> {
+        if self.eat(&TokenKind::Semi) {
+            return Ok(());
+        }
+        let found = self.peek().clone();
+        let diag = Diagnostic::error(
+            self.span(),
+            format!("expected `;` {context}, found {found}"),
+        )
+        .with_note("loops read `kanggo (ayo i = 0; i < 10; i++) { … }`");
+        self.diagnostics.push(diag);
+        Err(())
+    }
+
     fn expr_or_assign(&mut self) -> PResult<Stmt> {
+        let stmt = self.simple_stmt()?;
+        self.terminator()?;
+        Ok(stmt)
+    }
+
+    /// An expression, an assignment, or `i++`, `i--`, `++i`, `--i`, without
+    /// a terminator.
+    fn simple_stmt(&mut self) -> PResult<Stmt> {
+        if matches!(self.peek(), TokenKind::PlusPlus | TokenKind::MinusMinus) {
+            let op = self.advance();
+            let target = self.expr()?;
+            return self.increment(target, op);
+        }
         let target = self.expr()?;
+        if matches!(self.peek(), TokenKind::PlusPlus | TokenKind::MinusMinus) {
+            let op = self.advance();
+            return self.increment(target, op);
+        }
         let op = match self.peek() {
             TokenKind::Eq => Some(None),
             TokenKind::PlusEq => Some(Some(BinaryOp::Add)),
@@ -612,28 +752,51 @@ impl Parser {
             _ => None,
         };
         let Some(op) = op else {
-            let span = target.span;
-            self.terminator()?;
             return Ok(Stmt {
+                span: target.span,
                 kind: StmtKind::Expr(target),
-                span,
             });
         };
         self.advance();
-        if !matches!(
+        self.check_assignable(&target)?;
+        let value = self.expr()?;
+        Ok(Stmt {
+            span: target.span.to(self.prev_span()),
+            kind: StmtKind::Assign { target, op, value },
+        })
+    }
+
+    /// `i++` is `i += 1`, and `i--` is `i -= 1`.
+    fn increment(&mut self, target: Expr, op: Token) -> PResult<Stmt> {
+        self.check_assignable(&target)?;
+        let binary = if op.kind == TokenKind::PlusPlus {
+            BinaryOp::Add
+        } else {
+            BinaryOp::Sub
+        };
+        let one = Expr {
+            kind: ExprKind::Int(1),
+            span: op.span,
+        };
+        Ok(Stmt {
+            span: target.span.to(op.span),
+            kind: StmtKind::Assign {
+                target,
+                op: Some(binary),
+                value: one,
+            },
+        })
+    }
+
+    fn check_assignable(&mut self, target: &Expr) -> PResult<()> {
+        if matches!(
             target.kind,
             ExprKind::Name(_) | ExprKind::Index { .. } | ExprKind::Field { .. }
         ) {
-            self.error_at(target.span, "cannot assign to this expression");
-            return Err(());
+            return Ok(());
         }
-        let value = self.expr()?;
-        let span = target.span.to(self.prev_span());
-        self.terminator()?;
-        Ok(Stmt {
-            kind: StmtKind::Assign { target, op, value },
-            span,
-        })
+        self.error_at(target.span, "cannot assign to this expression");
+        Err(())
     }
 
     // ---- Expressions ---------------------------------------------------
@@ -768,10 +931,14 @@ impl Parser {
         }
     }
 
+    /// `-x`, and JavaScript's `!x`, which binds as tightly as `-` does (so
+    /// `!a == b` means `(!a) == b`, as in JavaScript).
     fn unary(&mut self) -> PResult<Expr> {
-        if !self.at(&TokenKind::Minus) {
-            return self.postfix();
-        }
+        let op = match self.peek() {
+            TokenKind::Minus => UnaryOp::Neg,
+            TokenKind::Bang => UnaryOp::Not,
+            _ => return self.postfix(),
+        };
         let start = self.advance().span;
         self.enter()?;
         let operand = self.unary();
@@ -780,7 +947,7 @@ impl Parser {
         Ok(Expr {
             span: start.to(operand.span),
             kind: ExprKind::Unary {
-                op: UnaryOp::Neg,
+                op,
                 operand: Box::new(operand),
             },
         })
@@ -865,6 +1032,22 @@ impl Parser {
             TokenKind::Int(value) => ExprKind::Int(value),
             TokenKind::Float(value) => ExprKind::Float(value),
             TokenKind::Str(value) => ExprKind::Str(value),
+            TokenKind::Template(pieces) => {
+                self.advance();
+                let mut parts = Vec::new();
+                for piece in pieces {
+                    parts.push(match piece {
+                        TemplatePiece::Text(text) => TemplatePart::Text(text),
+                        TemplatePiece::Code { source, offset } => {
+                            TemplatePart::Expr(self.template_expr(&source, offset)?)
+                        }
+                    });
+                }
+                return Ok(Expr {
+                    kind: ExprKind::Template(parts),
+                    span,
+                });
+            }
             TokenKind::Bener => ExprKind::Bool(true),
             TokenKind::Salah => ExprKind::Bool(false),
             TokenKind::Kosong => ExprKind::Null,
@@ -921,6 +1104,40 @@ impl Parser {
         };
         self.advance();
         Ok(Expr { kind, span })
+    }
+
+    /// Parses the expression inside a template string's `${…}`, keeping the
+    /// positions of its tokens in the file.
+    fn template_expr(&mut self, source: &str, offset: usize) -> PResult<Expr> {
+        if source.trim().is_empty() {
+            self.error_at(
+                Span::new(offset, offset + source.len()),
+                "empty `${}` in a template string",
+            );
+            return Err(());
+        }
+        let lexed = lexer::lex_at(source, offset);
+        let mut inner = Parser {
+            tokens: lexed.tokens,
+            pos: 0,
+            diagnostics: lexed.diagnostics,
+            no_struct: false,
+            depth: self.depth,
+        };
+        let result = inner.expr();
+        inner.skip_terminators();
+        if result.is_ok() && !inner.at(&TokenKind::Eof) {
+            let found = inner.peek().clone();
+            inner.error_here(format!(
+                "expected `}}` after the expression in `${{…}}`, found {found}"
+            ));
+        }
+        let failed = inner.diagnostics.iter().any(|d| d.is_error());
+        self.diagnostics.append(&mut inner.diagnostics);
+        match result {
+            Ok(expr) if !failed => Ok(expr),
+            _ => Err(()),
+        }
     }
 
     fn conversion(&mut self) -> PResult<Expr> {
@@ -1015,6 +1232,16 @@ mod tests {
             ExprKind::Int(v) => v.to_string(),
             ExprKind::Float(v) => format!("{v:?}"),
             ExprKind::Str(s) => format!("{s:?}"),
+            ExprKind::Template(parts) => {
+                let parts: Vec<_> = parts
+                    .iter()
+                    .map(|part| match part {
+                        TemplatePart::Text(text) => format!("{text:?}"),
+                        TemplatePart::Expr(e) => sexpr(e),
+                    })
+                    .collect();
+                format!("(template {})", parts.join(" "))
+            }
             ExprKind::Bool(b) => if *b { "bener" } else { "salah" }.to_string(),
             ExprKind::Null => "kosong".to_string(),
             ExprKind::Name(n) => n.clone(),
@@ -1288,6 +1515,149 @@ mod tests {
         assert_eq!(
             parsed.diagnostics[0].notes,
             ["put the `{` on the same line"]
+        );
+    }
+
+    // ---- JavaScript and TypeScript style -------------------------------
+
+    #[test]
+    fn typescript_style_types() {
+        let program = parse_ok("gawe f(xs: wilangan[][], n: wilangan): ukara[] { bali [] }");
+        let Item::Function(f) = &program.items[0] else {
+            panic!()
+        };
+        let TypeExprKind::Array(inner) = &f.params[0].ty.kind else {
+            panic!("expected an array type")
+        };
+        assert!(matches!(&inner.kind, TypeExprKind::Array(e) if e.kind == TypeExprKind::Wilangan));
+        assert!(matches!(
+            &f.ret.as_ref().unwrap().kind,
+            TypeExprKind::Array(e) if e.kind == TypeExprKind::Ukara
+        ));
+    }
+
+    #[test]
+    fn javascript_operators() {
+        assert_eq!(
+            expr_of("a && !b || c === d"),
+            "(utawa (lan a (ora b)) (== c d))"
+        );
+        // `!` binds tightly, as in JavaScript; `ora` loosely, as in Python.
+        assert_eq!(expr_of("!a == b"), "(== (ora a) b)");
+        assert_eq!(expr_of("ora a == b"), "(ora (== a b))");
+        assert_eq!(expr_of("a !== b"), "(!= a b)");
+    }
+
+    #[test]
+    fn template_strings() {
+        assert_eq!(
+            expr_of("`a ${x + 1} b ${f(y)}`"),
+            r#"(template "a " (+ x 1) " b " (call f y))"#
+        );
+        assert_eq!(expr_of("`plain`"), r#"(template "plain")"#);
+    }
+
+    #[test]
+    fn template_errors_point_inside_the_string() {
+        let parsed = parse("gawe utama() { tulis(`a ${}`) }");
+        assert_eq!(
+            parsed.diagnostics[0].message,
+            "empty `${}` in a template string"
+        );
+        let parsed = parse("gawe utama() { tulis(`a ${1 2}`) }");
+        assert_eq!(
+            parsed.diagnostics[0].message,
+            "expected `}` after the expression in `${…}`, found number `2`"
+        );
+        // The error points at the `2`, inside the string.
+        assert_eq!(parsed.diagnostics[0].span, Span::new(28, 29));
+    }
+
+    #[test]
+    fn increment_and_decrement_statements() {
+        let program = parse_ok("gawe utama() { i++; --j; xs[0]++ }");
+        let ops: Vec<_> = body(&program)
+            .iter()
+            .map(|stmt| match &stmt.kind {
+                StmtKind::Assign {
+                    op: Some(op),
+                    value,
+                    ..
+                } if matches!(value.kind, ExprKind::Int(1)) => *op,
+                other => panic!("expected an increment, got {other:?}"),
+            })
+            .collect();
+        assert_eq!(ops, [BinaryOp::Add, BinaryOp::Sub, BinaryOp::Add]);
+    }
+
+    #[test]
+    fn increment_inside_an_expression_has_a_hint() {
+        let parsed = parse("gawe utama() { tulis(i++) }");
+        assert_eq!(
+            parsed.diagnostics[0].message,
+            "expected `)` to close the argument list, found `++`"
+        );
+        assert_eq!(
+            parsed.diagnostics[0].notes,
+            ["`++` only works as a statement of its own, such as `i++`"]
+        );
+    }
+
+    #[test]
+    fn javascript_style_loops() {
+        let program = parse_ok(
+            "gawe utama() {
+                kanggo (ayo i = 0; i < 10; i++) { }
+                kanggo (;;) { mandheg }
+                kanggo (tetep x ing xs) { }
+                kanggo (i ing 0..3) { }
+            }",
+        );
+        let stmts = body(&program);
+        let StmtKind::ForC {
+            init: Some(init),
+            cond: Some(cond),
+            update: Some(update),
+            ..
+        } = &stmts[0].kind
+        else {
+            panic!("expected a C-style loop, got {:?}", stmts[0].kind)
+        };
+        assert!(matches!(init.kind, StmtKind::Let { mutable: true, .. }));
+        assert_eq!(sexpr(cond), "(< i 10)");
+        assert!(matches!(update.kind, StmtKind::Assign { .. }));
+        assert!(matches!(
+            stmts[1].kind,
+            StmtKind::ForC {
+                init: None,
+                cond: None,
+                update: None,
+                ..
+            }
+        ));
+        assert!(matches!(
+            &stmts[2].kind,
+            StmtKind::For { var, iter: ForIter::Each(_), .. } if var.name == "x"
+        ));
+        assert!(matches!(
+            stmts[3].kind,
+            StmtKind::For {
+                iter: ForIter::Range { .. },
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn loop_header_mistakes() {
+        let parsed = parse("gawe utama() { kanggo (ayo i = 0, i < 3; i++) {} }");
+        assert_eq!(
+            parsed.diagnostics[0].message,
+            "expected `;` after the loop's first part, found `,`"
+        );
+        assert_eq!(
+            parsed.diagnostics[0].notes,
+            ["loops read `kanggo (ayo i = 0; i < 10; i++) { … }`"]
         );
     }
 }

@@ -219,6 +219,29 @@ impl FunctionGen<'_> {
                 self.increment(index);
                 self.b.end_for();
             }
+            StmtKind::ForC {
+                init,
+                cond,
+                update,
+                body,
+            } => {
+                if let Some(init) = init {
+                    self.stmt(init);
+                }
+                self.b.begin_for();
+                let cond = match cond {
+                    Some(cond) => self.value(cond),
+                    None => self.b.const_bool(true),
+                };
+                self.b.begin_loop_body(cond);
+                self.block(body);
+                // `terusna` jumps here, so the update still runs.
+                self.b.begin_for_step();
+                if let Some(update) = update {
+                    self.stmt(update);
+                }
+                self.b.end_for();
+            }
             StmtKind::Return(value) => {
                 let value = value.as_ref().map(|value| self.value(value));
                 self.b.emit_return(value);

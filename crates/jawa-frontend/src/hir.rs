@@ -170,6 +170,14 @@ pub enum StmtKind {
         array: Expr,
         body: Block,
     },
+    /// `kanggo (init; cond; update)`. Without a condition the loop runs until
+    /// `mandheg` or `bali`; `terusna` runs the update.
+    ForC {
+        init: Option<Box<Stmt>>,
+        cond: Option<Expr>,
+        update: Option<Box<Stmt>>,
+        body: Block,
+    },
     Return(Option<Expr>),
     Break,
     Continue,

@@ -1,0 +1,76 @@
+// RUN: jawac run -O0 %s | FileCheck %s
+// RUN: jawac run -O2 %s | FileCheck %s
+
+// The JavaScript and TypeScript flavoured syntax: `: type` annotations,
+// `T[]` arrays, template strings, `&&`, `||`, `!`, `===`, `!==`, `++`, `--`,
+// semicolons, and `kanggo (…)` loops.
+
+wujud Wong {
+    jeneng: ukara;
+    umur: wilangan;
+}
+
+gawe fib(n: wilangan): wilangan {
+    yen (n < 2) {
+        bali n;
+    }
+    bali fib(n - 1) + fib(n - 2);
+}
+
+gawe diwasa(wong: Wong[]): ukara[] {
+    ayo asil: ukara[] = [];
+    kanggo (tetep w ing wong) {
+        yen (w.umur >= 18 && !(w.jeneng === "")) {
+            tambah(asil, w.jeneng);
+        }
+    }
+    bali asil;
+}
+
+gawe utama() {
+    // CHECK: fib(0) = 0
+    // CHECK-NEXT: fib(1) = 1
+    // CHECK: fib(9) = 34
+    kanggo (ayo i = 0; i < 10; i++) {
+        tulis(`fib(${i}) = ${fib(i)}`);
+    }
+
+    tetep wong: Wong[] = [Wong { jeneng: "Sri", umur: 20 }, Wong { jeneng: "Joko", umur: 12 }];
+    // CHECK-NEXT: diwasa: 1 ["Sri"]
+    tulis(`diwasa: ${dawane(diwasa(wong))}`, diwasa(wong));
+
+    // `!` binds tightly, as in JavaScript.
+    ayo a = salah;
+    // CHECK-NEXT: bener salah
+    tulis(!a == bener, !(a == salah));
+
+    // Increments, and a loop with no header that ends with `mandheg`.
+    ayo n = 10;
+    n--;
+    ++n;
+    kanggo (;;) {
+        n -= 3;
+        yen (n < 0) {
+            mandheg;
+        }
+    }
+    // CHECK-NEXT: n = -2, ok = bener
+    tulis(`n = ${n}, ok = ${n !== 0 || salah}`);
+
+    // `terusna` in a `kanggo (…)` loop still runs the update.
+    ayo ganjil = "";
+    kanggo (ayo i = 0; i < 6; i++) {
+        yen (i % 2 === 0) {
+            terusna;
+        }
+        ganjil += `${i} `;
+    }
+    // CHECK-NEXT: 1 3 5
+    tulis(ganjil);
+
+    // Template strings may span lines and escape their delimiters.
+    // CHECK-NEXT: baris siji
+    // CHECK-NEXT: baris loro: `${n}` ora diganti
+    tulis(`baris siji
+baris loro: \`\${n}\` ora diganti`);
+}
