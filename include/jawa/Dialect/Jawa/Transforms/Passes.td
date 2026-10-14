@@ -25,4 +25,15 @@ def JawaFlattenCFG : Pass<"jawa-flatten-cfg", "::mlir::func::FuncOp"> {
   let dependentDialects = ["::mlir::cf::ControlFlowDialect"];
 }
 
+def JawaFuseConcat : Pass<"jawa-fuse-concat", "::mlir::func::FuncOp"> {
+  let summary = "Merge chains of string concatenation into one allocation";
+  let description = [{
+    `a + b + c` on strings arrives as nested binary `jawa.concat` ops, and
+    each would allocate an intermediate string. This pass rewrites trees of
+    single-use concats into one n-ary `jawa.concat`, which the runtime builds
+    with a single allocation, and joins neighbouring constant pieces at
+    compile time.
+  }];
+}
+
 #endif // JAWA_DIALECT_JAWA_TRANSFORMS_PASSES_TD
