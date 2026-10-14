@@ -1,6 +1,6 @@
-// The Fibonacci numbers, two ways.
+// Angka Fibonacci, dietung nganggo rong cara.
 
-// Recursive: fib(n) = fib(n - 1) + fib(n - 2).
+// Rekursif: fib(n) = fib(n - 1) + fib(n - 2).
 gawe fib(n: wilangan): wilangan {
     yen (n < 2) {
         bali n
@@ -8,7 +8,7 @@ gawe fib(n: wilangan): wilangan {
     bali fib(n - 1) + fib(n - 2)
 }
 
-// Iterative, collecting the sequence in an array ("larik").
+// Iteratif: urutane diklumpukake ing larik.
 gawe larik_fib(cacah: wilangan): wilangan[] {
     ayo asil: wilangan[] = []
     ayo a = 0

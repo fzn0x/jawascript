@@ -1,53 +1,52 @@
-// Weton: the Javanese day of birth.
+// Weton: dina lair miturut petungan Jawa.
 //
-// Javanese tradition combines the seven-day week with the five-day market
-// week (pasaran: Legi, Pahing, Pon, Wage, Kliwon), so a weekday and pasaran
-// pair repeats every 35 days. Each day and each pasaran has a value, and
-// their sum, the neptu, is still used when choosing dates for weddings and
-// other events.
+// Tradhisi Jawa nggandhengake minggon pitung dina karo pasaran limang dina
+// (Legi, Pahing, Pon, Wage, Kliwon), mula pasangan dina lan pasaran mbaleni
+// saben 35 dina. Saben dina lan saben pasaran duwe biji, lan gunggunge, yaiku
+// neptu, isih dienggo kanggo milih dina becik, kayata kanggo mantenan.
 
-// Days since 1 January 1970 for a date in the proleptic Gregorian calendar
-// (Howard Hinnant's days_from_civil).
-gawe dina_saka_epoch(taun: wilangan, sasi: wilangan, tanggal: wilangan): wilangan {
-    ayo y = taun
+// Cacahe dina wiwit 1 Januari 1970 nganti tanggal iki, ing tanggalan
+// Gregorian (petungan saka Howard Hinnant).
+gawe dina_wiwit_1970(taun: wilangan, sasi: wilangan, tanggal: wilangan): wilangan {
+    ayo t = taun
     yen sasi <= 2 {
-        y -= 1
+        t -= 1
     }
-    ayo era = y / 400
-    yen y < 0 {
-        era = (y - 399) / 400
+    ayo jaman = t / 400
+    yen t < 0 {
+        jaman = (t - 399) / 400
     }
-    tetep yoe = y - era * 400
-    ayo mp = sasi - 3
+    tetep taun_jaman = t - jaman * 400
+    ayo sasi_geser = sasi - 3
     yen sasi <= 2 {
-        mp = sasi + 9
+        sasi_geser = sasi + 9
     }
-    tetep doy = (153 * mp + 2) / 5 + tanggal - 1
-    tetep doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
-    bali era * 146097 + doe - 719468
+    tetep dina_taun = (153 * sasi_geser + 2) / 5 + tanggal - 1
+    tetep dina_jaman = taun_jaman * 365 + taun_jaman / 4 - taun_jaman / 100 + dina_taun
+    bali jaman * 146097 + dina_jaman - 719468
 }
 
-// A remainder that is never negative, for dates before 1970.
-gawe modulo(a: wilangan, b: wilangan): wilangan {
+// Turahing pambagi sing ora tau negatif, kanggo tanggal sadurunge 1970.
+gawe turah(a: wilangan, b: wilangan): wilangan {
     bali (a % b + b) % b
 }
 
 gawe weton(taun: wilangan, sasi: wilangan, tanggal: wilangan) {
-    // 1 January 1970 was a Thursday (Kemis) and a Wage.
+    // 1 Januari 1970 tibane dina Kemis, pasaran Wage.
     tetep dina = ["Kemis", "Jemuwah", "Setu", "Minggu", "Senin", "Selasa", "Rebo"]
     tetep neptu_dina = [8, 6, 9, 5, 4, 3, 7]
     tetep pasaran = ["Legi", "Pahing", "Pon", "Wage", "Kliwon"]
     tetep neptu_pasaran = [5, 9, 7, 4, 8]
 
-    tetep n = dina_saka_epoch(taun, sasi, tanggal)
-    tetep d = modulo(n, 7)
-    tetep p = modulo(n + 3, 5)
+    tetep n = dina_wiwit_1970(taun, sasi, tanggal)
+    tetep d = turah(n, 7)
+    tetep p = turah(n + 3, 5)
     tetep neptu = neptu_dina[d] + neptu_pasaran[p]
     tulis(`${tanggal}-${sasi}-${taun}: ${dina[d]} ${pasaran[p]}, neptu ${neptu}`)
 }
 
 gawe utama() {
-    weton(1945, 8, 17)  // Proklamasi Kemerdekaan Indonesia
+    weton(1945, 8, 17)  // Proklamasi Kamardikan Indonesia
     weton(1928, 10, 28) // Sumpah Pemuda
     weton(2000, 1, 1)
     weton(2026, 10, 14)

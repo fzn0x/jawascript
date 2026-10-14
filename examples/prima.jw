@@ -1,4 +1,4 @@
-// Prime numbers below 100 with the sieve of Eratosthenes.
+// Angka prima ing ngisor 100 nganggo saringan Eratosthenes.
 
 gawe saringan(wates: wilangan): wilangan[] {
     ayo prima: logika[] = []

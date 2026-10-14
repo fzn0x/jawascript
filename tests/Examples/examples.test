@@ -2,7 +2,7 @@ Every program in examples/ compiles and prints what its comments promise.
 
 RUN: jawac run %examples/sugeng_rawuh.jw | FileCheck %s --check-prefix=SUGENG
 SUGENG: Sugeng rawuh ing JawaScript!
-SUGENG-NEXT: Halo, Jawa!
+SUGENG-NEXT: Piye kabare, Jawa?
 
 RUN: jawac run %examples/fibonacci.jw | FileCheck %s --check-prefix=FIB
 FIB: fib(30) = 832040
@@ -32,7 +32,7 @@ WETON-NEXT: 14-10-2026: Rebo Wage, neptu 11
 RUN: jawac run %examples/dhaptar.jw | FileCheck %s --check-prefix=DHAPTAR
 DHAPTAR: jarak kuadrat: 25.0
 DHAPTAR-NEXT: simpul kapisan: 1 sabanjure: 2
-DHAPTAR-NEXT: jumlah 1..10: 55
+DHAPTAR-NEXT: gunggung 1..10: 55
 DHAPTAR-NEXT: omah.x saiki 100.0
 
 RUN: jawac run %examples/urutan.jw | FileCheck %s --check-prefix=URUTAN
@@ -45,9 +45,9 @@ PRIMA: ana 25 angka prima ing ngisor 100:
 PRIMA-NEXT: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
 
 RUN: jawac run %examples/aksara.jw | FileCheck %s --check-prefix=AKSARA
-AKSARA: ꦲꦤꦕꦫꦏ ha na ca ra ka - there were two messengers
-AKSARA: ꦩꦒꦧꦛꦔ ma ga ba tha nga - and both of them died
-AKSARA-NEXT: ꦗꦮ (jawa) is 6 bytes of UTF-8
+AKSARA: ꦲꦤꦕꦫꦏ ha na ca ra ka - ana utusan loro
+AKSARA: ꦩꦒꦧꦛꦔ ma ga ba tha nga - padha dadi bathang
+AKSARA-NEXT: ꦗꦮ (jawa) dawane 6 bita UTF-8
 
 RUN: jawac run %examples/tembung.jw | FileCheck %s --check-prefix=TEMBUNG
 TEMBUNG: Jenengku Sri, umurku 20, dhuwurku 1.62 meter.

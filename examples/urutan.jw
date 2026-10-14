@@ -1,36 +1,36 @@
-// Sorting an array in place with quicksort ("ngurutake": to put in order).
+// Ngurutake larik ing panggonane dhewe nganggo quicksort.
 
-gawe ijolan(xs: wilangan[], i: wilangan, j: wilangan) {
-    tetep sauntara = xs[i]
-    xs[i] = xs[j]
-    xs[j] = sauntara
+gawe ijolan(larik: wilangan[], i: wilangan, j: wilangan) {
+    tetep sauntara = larik[i]
+    larik[i] = larik[j]
+    larik[j] = sauntara
 }
 
-gawe pisah(xs: wilangan[], kiwa: wilangan, tengen: wilangan): wilangan {
-    tetep poros = xs[tengen]
+gawe pisah(larik: wilangan[], kiwa: wilangan, tengen: wilangan): wilangan {
+    tetep poros = larik[tengen]
     ayo i = kiwa
     kanggo j ing kiwa..tengen {
-        yen xs[j] < poros {
-            ijolan(xs, i, j)
+        yen larik[j] < poros {
+            ijolan(larik, i, j)
             i += 1
         }
     }
-    ijolan(xs, i, tengen)
+    ijolan(larik, i, tengen)
     bali i
 }
 
-gawe ngurutake(xs: wilangan[], kiwa: wilangan, tengen: wilangan) {
+gawe ngurutake(larik: wilangan[], kiwa: wilangan, tengen: wilangan) {
     yen kiwa >= tengen {
         bali
     }
-    tetep p = pisah(xs, kiwa, tengen)
-    ngurutake(xs, kiwa, p - 1)
-    ngurutake(xs, p + 1, tengen)
+    tetep p = pisah(larik, kiwa, tengen)
+    ngurutake(larik, kiwa, p - 1)
+    ngurutake(larik, p + 1, tengen)
 }
 
-gawe wis_urut(xs: wilangan[]): logika {
-    kanggo i ing 1..dawane(xs) {
-        yen xs[i - 1] > xs[i] {
+gawe wis_urut(larik: wilangan[]): logika {
+    kanggo i ing 1..dawane(larik) {
+        yen larik[i - 1] > larik[i] {
             bali salah
         }
     }

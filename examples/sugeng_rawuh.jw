@@ -1,7 +1,7 @@
-// Sugeng rawuh: "welcome" in Javanese.
+// Sugeng rawuh: pambagya marang sing lagi teka.
 
 gawe utama() {
     tulis("Sugeng rawuh ing JawaScript!")
     tetep jeneng = "Jawa"
-    tulis(`Halo, ${jeneng}!`)
+    tulis(`Piye kabare, ${jeneng}?`)
 }

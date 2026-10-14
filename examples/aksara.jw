@@ -1,5 +1,5 @@
-// Hanacaraka: the Javanese script (aksara Jawa) and the legend behind its
-// twenty letters. Strings are UTF-8, so aksara Jawa prints as it is.
+// Hanacaraka: aksara Jawa lan crita ing sangisore rong puluh aksarane.
+// Ukara nganggo UTF-8, mula aksara Jawa bisa ditulis apa anane.
 
 gawe utama() {
     tetep aksara = [
@@ -15,10 +15,10 @@ gawe utama() {
         "ma", "ga", "ba", "tha", "nga",
     ]
     tetep tegese = [
-        "there were two messengers",
-        "they fought",
-        "they were equally strong",
-        "and both of them died",
+        "ana utusan loro",
+        "padha pasulayan",
+        "padha digdayane",
+        "padha dadi bathang",
     ]
 
     kanggo baris ing 0..4 {
@@ -33,5 +33,5 @@ gawe utama() {
     }
 
     tetep jeneng = "ꦗꦮ"
-    tulis(jeneng, "(jawa) is", dawane(jeneng), "bytes of UTF-8")
+    tulis(jeneng, "(jawa) dawane", dawane(jeneng), "bita UTF-8")
 }

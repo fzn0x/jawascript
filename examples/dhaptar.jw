@@ -1,4 +1,4 @@
-// Structs (wujud) and a linked list (dhaptar).
+// Wujud lan dhaptar sambung: saben simpul nuding simpul sabanjure.
 
 wujud Titik {
     x: pecahan
@@ -11,12 +11,12 @@ wujud Simpul {
 }
 
 gawe jarak_kuadrat(a: Titik, b: Titik): pecahan {
-    tetep dx = a.x - b.x
-    tetep dy = a.y - b.y
-    bali dx * dx + dy * dy
+    tetep bedane_x = a.x - b.x
+    tetep bedane_y = a.y - b.y
+    bali bedane_x * bedane_x + bedane_y * bedane_y
 }
 
-// Builds 1 -> 2 -> ... -> n, with `kosong` (null) at the end.
+// Nggawe dhaptar 1 -> 2 -> ... -> n, pungkasane `kosong`.
 gawe gawe_dhaptar(n: wilangan): Simpul {
     ayo sirah: Simpul = kosong
     ayo i = n
@@ -27,14 +27,14 @@ gawe gawe_dhaptar(n: wilangan): Simpul {
     bali sirah
 }
 
-gawe jumlah(dhaptar: Simpul): wilangan {
-    ayo total = 0
+gawe gunggung(dhaptar: Simpul): wilangan {
+    ayo asil = 0
     ayo simpul = dhaptar
     sajrone simpul != kosong {
-        total += simpul.regane
+        asil += simpul.regane
         simpul = simpul.sabanjure
     }
-    bali total
+    bali asil
 }
 
 gawe utama() {
@@ -44,9 +44,9 @@ gawe utama() {
 
     tetep dhaptar = gawe_dhaptar(10)
     tulis("simpul kapisan:", dhaptar.regane, "sabanjure:", dhaptar.sabanjure.regane)
-    tulis("jumlah 1..10:", jumlah(dhaptar))
+    tulis("gunggung 1..10:", gunggung(dhaptar))
 
-    // Structs are references: both names see the change.
+    // Wujud iku referensi: jeneng loro-lorone weruh owah-owahane.
     ayo kancane = omah
     kancane.x = 100
     tulis("omah.x saiki", omah.x)

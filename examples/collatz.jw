@@ -1,5 +1,5 @@
-// The Collatz sequence: halve even numbers, triple odd ones and add one,
-// until reaching 1.
+// Urutan Collatz: wilangan genep dibagi loro, wilangan ganjil dikaping telu
+// banjur ditambah siji, nganti tekan 1.
 
 gawe langkah(n: wilangan): wilangan {
     yen (n % 2 === 0) {

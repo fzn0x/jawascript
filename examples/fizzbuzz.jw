@@ -1,5 +1,5 @@
-// FizzBuzz played on a gamelan: multiples of 3 strike the gong, multiples
-// of 5 the kendhang (drum), and multiples of both strike both.
+// FizzBuzz ditabuh nganggo gamelan: kelipatan 3 nabuh gong, kelipatan 5
+// nabuh kendhang, lan kelipatan loro-lorone nabuh kabeh.
 
 gawe utama() {
     kanggo (ayo n = 1; n <= 20; n++) {
