@@ -1,0 +1,53 @@
+// Structs (wujud) and a linked list (dhaptar).
+
+wujud Titik {
+    x: pecahan
+    y: pecahan
+}
+
+wujud Simpul {
+    regane: wilangan
+    sabanjure: Simpul
+}
+
+gawe jarak_kuadrat(a: Titik, b: Titik) -> pecahan {
+    tetep dx = a.x - b.x
+    tetep dy = a.y - b.y
+    bali dx * dx + dy * dy
+}
+
+// Builds 1 -> 2 -> ... -> n, with `kosong` (null) at the end.
+gawe gawe_dhaptar(n: wilangan) -> Simpul {
+    ayo sirah: Simpul = kosong
+    ayo i = n
+    sajrone i > 0 {
+        sirah = Simpul { regane: i, sabanjure: sirah }
+        i -= 1
+    }
+    bali sirah
+}
+
+gawe jumlah(dhaptar: Simpul) -> wilangan {
+    ayo total = 0
+    ayo simpul = dhaptar
+    sajrone simpul != kosong {
+        total += simpul.regane
+        simpul = simpul.sabanjure
+    }
+    bali total
+}
+
+gawe utama() {
+    tetep omah = Titik { x: 1.5, y: 2 }
+    tetep pasar = Titik { x: 4.5, y: 6 }
+    tulis("jarak kuadrat:", jarak_kuadrat(omah, pasar))
+
+    tetep dhaptar = gawe_dhaptar(10)
+    tulis("simpul kapisan:", dhaptar.regane, "sabanjure:", dhaptar.sabanjure.regane)
+    tulis("jumlah 1..10:", jumlah(dhaptar))
+
+    // Structs are references: both names see the change.
+    ayo kancane = omah
+    kancane.x = 100
+    tulis("omah.x saiki", omah.x)
+}

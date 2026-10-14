@@ -1,0 +1,33 @@
+// Prime numbers below 100 with the sieve of Eratosthenes.
+
+gawe saringan(wates: wilangan) -> [wilangan] {
+    ayo prima: [logika] = []
+    kanggo i ing 0..wates {
+        tambah(prima, i >= 2)
+    }
+    ayo i = 2
+    sajrone i * i < wates {
+        yen prima[i] {
+            ayo kelipatan = i * i
+            sajrone kelipatan < wates {
+                prima[kelipatan] = salah
+                kelipatan += i
+            }
+        }
+        i += 1
+    }
+
+    ayo asil: [wilangan] = []
+    kanggo n ing 0..wates {
+        yen prima[n] {
+            tambah(asil, n)
+        }
+    }
+    bali asil
+}
+
+gawe utama() {
+    tetep prima = saringan(100)
+    tulis("ana", dawane(prima), "angka prima ing ngisor 100:")
+    tulis(prima)
+}

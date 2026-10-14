@@ -1,0 +1,46 @@
+// Sorting an array in place with quicksort ("ngurutake": to put in order).
+
+gawe ijolan(xs: [wilangan], i: wilangan, j: wilangan) {
+    tetep sauntara = xs[i]
+    xs[i] = xs[j]
+    xs[j] = sauntara
+}
+
+gawe pisah(xs: [wilangan], kiwa: wilangan, tengen: wilangan) -> wilangan {
+    tetep poros = xs[tengen]
+    ayo i = kiwa
+    kanggo j ing kiwa..tengen {
+        yen xs[j] < poros {
+            ijolan(xs, i, j)
+            i += 1
+        }
+    }
+    ijolan(xs, i, tengen)
+    bali i
+}
+
+gawe ngurutake(xs: [wilangan], kiwa: wilangan, tengen: wilangan) {
+    yen kiwa >= tengen {
+        bali
+    }
+    tetep p = pisah(xs, kiwa, tengen)
+    ngurutake(xs, kiwa, p - 1)
+    ngurutake(xs, p + 1, tengen)
+}
+
+gawe wis_urut(xs: [wilangan]) -> logika {
+    kanggo i ing 1..dawane(xs) {
+        yen xs[i - 1] > xs[i] {
+            bali salah
+        }
+    }
+    bali bener
+}
+
+gawe utama() {
+    ayo angka = [38, 27, 43, 3, 9, 82, 10, -5, 27, 0]
+    tulis("sadurunge:", angka)
+    ngurutake(angka, 0, dawane(angka) - 1)
+    tulis("sawise:   ", angka)
+    tulis("wis urut?", wis_urut(angka))
+}
