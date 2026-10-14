@@ -1,6 +1,7 @@
 # JawaScript
 
 [![CI](https://github.com/fzn0x/jawascript/actions/workflows/ci.yml/badge.svg)](https://github.com/fzn0x/jawascript/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-fzn0x.github.io%2Fjawascript-E8B04B)](https://fzn0x.github.io/jawascript/)
 
 <p align="center">
   <img src="assets/jawac-cmd.svg" width="920" alt="An editor showing fib.jw, a Fibonacci program written with Javanese keywords, next to a Command Prompt window where jawac run fib.jw prints fib(0) = 0 through fib(9) = 34">
@@ -136,8 +137,12 @@ jawac run examples/weton.jw
 ### 6. Explore
 
 - Run the [examples](#examples): `build/bin/jawac run examples/aksara.jw`.
+- Take the [guided tour](docs/guide.md), with an example for every feature.
+- Keep the [vocabulary](docs/vocabulary.md) open: every Jawa word, its meaning and its JavaScript counterpart.
 - Read the [language reference](docs/language.md) for everything Jawa can do.
 - See how the compiler works in [docs/architecture.md](docs/architecture.md).
+
+All of these are also on the documentation website, **[fzn0x.github.io/jawascript](https://fzn0x.github.io/jawascript/)**.
 
 ## Coming from JavaScript or TypeScript
 
@@ -312,9 +317,10 @@ Add the line to `~/.bashrc` (Git Bash) or your PowerShell profile to make it per
 | `runtime` | `jawa_rt`: strings, arrays, printing and runtime errors, on bdwgc |
 | `examples` | Runnable Jawa programs |
 | `tests` | The lit suite |
-| `docs` | The language reference and the architecture guide |
+| `docs` | The guide, the vocabulary, the language reference and the architecture guide |
+| `site` | The documentation website's layout, styles and fonts; `scripts/build_site.py` builds it from `docs` |
 | `assets` | The README image |
-| `scripts` | `build.sh` and `test.sh` |
+| `scripts` | `build.sh`, `test.sh`, and the scripts that build the website and check the guide's examples |
 
 ## Contributing
 

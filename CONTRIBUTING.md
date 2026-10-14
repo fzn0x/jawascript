@@ -36,6 +36,19 @@ build/bin/jawa-opt file.mlir -jawa-flatten-cfg -mlir-print-ir-after-all
 - `include/jawa`, `lib`: the `jawa` dialect (TableGen and C++), its passes, the lowering to LLVM, the pipeline, and the C++ half of the bridge.
 - `runtime`: the C runtime. Its data layouts must match `lib/Conversion/JawaToLLVM`.
 - `tests`: the lit suite. `docs/architecture.md` explains how the pieces fit.
+- `docs`, `site`: the documentation and the website built from it.
+
+## Documentation
+
+The guide's examples are checked: each ```` ```ts ```` program followed by a ```` ```text ```` block must print exactly that block, and `tests/Docs` runs them through `jawac`. Write Jawa code in the docs with Javanese names, comments and text, as in the examples.
+
+To preview the website, which GitHub Pages publishes from `main`:
+
+```sh
+python3 -m pip install markdown
+python3 scripts/build_site.py              # writes build/site
+python3 -m http.server -d build/site 8000  # then open http://localhost:8000
+```
 
 ## Ground rules
 
