@@ -1,0 +1,38 @@
+The command line.
+
+RUN: jawac --help | FileCheck %s --check-prefix=HELP
+HELP: Usage:
+HELP: jawac run [options] <file.jw>
+HELP: --emit <kind>
+
+RUN: jawac --version | FileCheck %s --check-prefix=VERSION
+VERSION: jawac {{[0-9]+\.[0-9]+\.[0-9]+}}
+
+Build an executable, then run it on its own.
+RUN: jawac %S/Inputs/salam.jw -o %t.exe
+RUN: %t.exe | FileCheck %s --check-prefix=OUT
+RUN: jawac run -O3 %S/Inputs/salam.jw | FileCheck %s --check-prefix=OUT
+RUN: jawac run -O0 %S/Inputs/salam.jw | FileCheck %s --check-prefix=OUT
+OUT: salam
+
+Write IR to a file instead of standard output.
+RUN: jawac --emit mlir %S/Inputs/salam.jw -o %t.mlir
+RUN: FileCheck %s --check-prefix=MLIR --input-file=%t.mlir
+MLIR: jawa.str_const "salam"
+
+`check` only type-checks; a well-typed program prints nothing.
+RUN: jawac check %S/Inputs/salam.jw 2>&1 | count 0
+
+Usage errors exit with status 2 (`not` accepts any failure).
+RUN: not jawac --frob %S/Inputs/salam.jw 2>&1 | FileCheck %s --check-prefix=UNKNOWN
+UNKNOWN: error: unknown option `--frob`
+UNKNOWN: Run `jawac --help` for usage.
+
+RUN: not jawac 2>&1 | FileCheck %s --check-prefix=NOINPUT
+NOINPUT: error: no input file; pass a `.jw` file to compile
+
+RUN: not jawac --emit=wasm %S/Inputs/salam.jw 2>&1 | FileCheck %s --check-prefix=EMIT
+EMIT: error: unknown `--emit` kind `wasm`
+
+RUN: not jawac %S/Inputs/missing.jw 2>&1 | FileCheck %s --check-prefix=MISSING
+MISSING: error: cannot read `{{.*}}missing.jw`

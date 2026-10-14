@@ -1,0 +1,3 @@
+gawe utama() {
+    tulis("salam")
+}

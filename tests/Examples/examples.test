@@ -1,0 +1,57 @@
+Every program in examples/ compiles and prints what its comments promise.
+
+RUN: jawac run %examples/sugeng_rawuh.jw | FileCheck %s --check-prefix=SUGENG
+SUGENG: Sugeng rawuh ing JawaScript!
+SUGENG-NEXT: Halo, Jawa!
+
+RUN: jawac run %examples/fibonacci.jw | FileCheck %s --check-prefix=FIB
+FIB: fib(30) = 832040
+FIB-NEXT: 20 angka kapisan: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181]
+
+RUN: jawac run %examples/fizzbuzz.jw | FileCheck %s --check-prefix=FIZZ
+FIZZ: 1
+FIZZ-NEXT: 2
+FIZZ-NEXT: Gong
+FIZZ-NEXT: 4
+FIZZ-NEXT: Kendhang
+FIZZ: 14
+FIZZ-NEXT: Gong Kendhang
+FIZZ: 19
+FIZZ-NEXT: Kendhang
+
+RUN: jawac run %examples/collatz.jw | FileCheck %s --check-prefix=COLLATZ
+COLLATZ: 27 tekan 1 sawise 111 langkah
+COLLATZ-NEXT: angka paling dhuwur: 9232
+
+RUN: jawac run %examples/weton.jw | FileCheck %s --check-prefix=WETON
+WETON: 17-8-1945: Jemuwah Legi, neptu 11
+WETON-NEXT: 28-10-1928: Minggu Wage, neptu 9
+WETON-NEXT: 1-1-2000: Setu Legi, neptu 14
+WETON-NEXT: 14-10-2026: Rebo Wage, neptu 11
+
+RUN: jawac run %examples/dhaptar.jw | FileCheck %s --check-prefix=DHAPTAR
+DHAPTAR: jarak kuadrat: 25.0
+DHAPTAR-NEXT: simpul kapisan: 1 sabanjure: 2
+DHAPTAR-NEXT: jumlah 1..10: 55
+DHAPTAR-NEXT: omah.x saiki 100.0
+
+RUN: jawac run %examples/urutan.jw | FileCheck %s --check-prefix=URUTAN
+URUTAN: sadurunge: [38, 27, 43, 3, 9, 82, 10, -5, 27, 0]
+URUTAN-NEXT: sawise:    [-5, 0, 3, 9, 10, 27, 27, 38, 43, 82]
+URUTAN-NEXT: wis urut? bener
+
+RUN: jawac run %examples/prima.jw | FileCheck %s --check-prefix=PRIMA
+PRIMA: ana 25 angka prima ing ngisor 100:
+PRIMA-NEXT: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+
+RUN: jawac run %examples/aksara.jw | FileCheck %s --check-prefix=AKSARA
+AKSARA: ꦲꦤꦕꦫꦏ ha na ca ra ka - there were two messengers
+AKSARA: ꦩꦒꦧꦛꦔ ma ga ba tha nga - and both of them died
+AKSARA-NEXT: ꦗꦮ (jawa) is 6 bytes of UTF-8
+
+RUN: jawac run %examples/tembung.jw | FileCheck %s --check-prefix=TEMBUNG
+TEMBUNG: Jenengku Sri, umurku 20, dhuwurku 1.62 meter.
+TEMBUNG-NEXT: Wis diwasa? bener
+TEMBUNG-NEXT: 40 2 43 5.0
+TEMBUNG-NEXT: bener bener bener
+TEMBUNG-NEXT: hahaha!
