@@ -1,33 +1,33 @@
-// Every runtime error prints `gagal: …` to stderr, after flushing what the
-// program printed so far, and exits with status 1.
+// Saben kesalahan nalika mlaku nulis `gagal: …` menyang stderr, sawise
+// ngetokake apa sing wis ditulis program, banjur metu kanthi status 1.
 
 // RUN: split-file %s %t
-// RUN: not jawac run %t/index.jw 2>&1 | FileCheck %s --check-prefix=INDEX
-// RUN: not jawac run %t/negative.jw 2>&1 | FileCheck %s --check-prefix=NEGATIVE
-// RUN: not jawac run %t/null.jw 2>&1 | FileCheck %s --check-prefix=NULL
-// RUN: not jawac run %t/zero.jw 2>&1 | FileCheck %s --check-prefix=ZERO
-// RUN: not jawac run -O0 %t/zero.jw 2>&1 | FileCheck %s --check-prefix=ZERO
-// RUN: not jawac run %t/parse.jw 2>&1 | FileCheck %s --check-prefix=PARSE
+// RUN: not jawac run %t/indeks.jw 2>&1 | FileCheck %s --check-prefix=INDEKS
+// RUN: not jawac run %t/negatif.jw 2>&1 | FileCheck %s --check-prefix=NEGATIF
+// RUN: not jawac run %t/kosong.jw 2>&1 | FileCheck %s --check-prefix=KOSONG
+// RUN: not jawac run %t/nol.jw 2>&1 | FileCheck %s --check-prefix=NOL
+// RUN: not jawac run -O0 %t/nol.jw 2>&1 | FileCheck %s --check-prefix=NOL
+// RUN: not jawac run %t/maca.jw 2>&1 | FileCheck %s --check-prefix=MACA
 // RUN: not jawac run %t/gagal.jw 2>&1 | FileCheck %s --check-prefix=GAGAL
 
-//--- index.jw
+//--- indeks.jw
 gawe utama() {
-    ayo xs = [1, 2, 3]
-    tulis("before")
-    tulis(xs[3])
+    ayo larik = [1, 2, 3]
+    tulis("sadurunge")
+    tulis(larik[3])
 }
-// INDEX: before
-// INDEX-NEXT: gagal: index 3 is out of bounds for an array of length 3
+// INDEKS: sadurunge
+// INDEKS-NEXT: gagal: indeks 3 ora ana ing larik sing dawane 3
 
-//--- negative.jw
+//--- negatif.jw
 gawe utama() {
-    ayo xs = [1, 2, 3]
+    ayo larik = [1, 2, 3]
     ayo i = -1
-    xs[i] = 0
+    larik[i] = 0
 }
-// NEGATIVE: gagal: index -1 is out of bounds for an array of length 3
+// NEGATIF: gagal: indeks -1 ora ana ing larik sing dawane 3
 
-//--- null.jw
+//--- kosong.jw
 wujud Simpul {
     regane: wilangan
     sabanjure: Simpul
@@ -37,9 +37,9 @@ gawe utama() {
     ayo n = Simpul { regane: 1, sabanjure: kosong }
     tulis(n.sabanjure.regane)
 }
-// NULL: gagal: used a field of `kosong`
+// KOSONG: gagal: `kosong` ora duwe isi
 
-//--- zero.jw
+//--- nol.jw
 gawe bagi(a: wilangan, b: wilangan) -> wilangan {
     bali a / b
 }
@@ -48,14 +48,14 @@ gawe utama() {
     tulis(bagi(1, 1))
     tulis(bagi(1, 0))
 }
-// ZERO: 1
-// ZERO-NEXT: gagal: division by zero
+// NOL: 1
+// NOL-NEXT: gagal: dibagi nol
 
-//--- parse.jw
+//--- maca.jw
 gawe utama() {
     tulis(wilangan("12abc"))
 }
-// PARSE: gagal: cannot read "12abc" as a wilangan
+// MACA: gagal: "12abc" dudu wilangan
 
 //--- gagal.jw
 gawe utama() {

@@ -271,15 +271,16 @@ A type name used like a function converts a value:
 
 ## Runtime errors
 
-Some mistakes can only be seen while the program runs. Each one prints a message starting with `gagal:` to standard error, after anything the program has printed so far, and exits with status 1:
+Some mistakes can only be seen while the program runs. Each one prints a message in Javanese, starting with `gagal:` ("failed"), to standard error, after anything the program has printed so far, and exits with status 1:
 
-| Cause | Message |
-| --- | --- |
-| An index outside `0 .. dawane(xs) - 1` | `gagal: index 3 is out of bounds for an array of length 3` |
-| A field of `kosong` | ``gagal: used a field of `kosong` `` |
-| Integer division or remainder by zero | `gagal: division by zero` |
-| `wilangan(s)` or `pecahan(s)` on text that is not a number | `gagal: cannot read "abc" as a wilangan` |
-| `gagal(pesen)` | `gagal: ` followed by the message |
+| Cause | Message | Meaning |
+| --- | --- | --- |
+| An index outside `0 .. dawane(larik) - 1` | `gagal: indeks 3 ora ana ing larik sing dawane 3` | index 3 does not exist in an array of length 3 |
+| A field of `kosong` | ``gagal: `kosong` ora duwe isi`` | `kosong` has no contents |
+| Integer division or remainder by zero | `gagal: dibagi nol` | divided by zero |
+| `wilangan(s)` or `pecahan(s)` on text that is not a number | `gagal: "abc" dudu wilangan` | "abc" is not a wilangan |
+| The heap is exhausted | `gagal: memori entek` | out of memory |
+| `gagal(pesen)` | `gagal: ` followed by the message | |
 
 ## Keyword list
 

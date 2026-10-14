@@ -46,14 +46,17 @@ _Noreturn void jawa_rt_panic(const jawa_str *message) {
   fail("%s", message->data);
 }
 
+/* Programs speak Javanese, so do their errors. "Index 5 does not exist in an
+ * array whose length is 3." */
 _Noreturn void jawa_rt_panic_index(int64_t index, int64_t len) {
-  fail("index %" PRId64 " is out of bounds for an array of length %" PRId64,
-       index, len);
+  fail("indeks %" PRId64 " ora ana ing larik sing dawane %" PRId64, index, len);
 }
 
-_Noreturn void jawa_rt_panic_null(void) { fail("used a field of `kosong`"); }
+/* "`kosong` has no contents": a field of a null struct. */
+_Noreturn void jawa_rt_panic_null(void) { fail("`kosong` ora duwe isi"); }
 
-_Noreturn void jawa_rt_panic_div_zero(void) { fail("division by zero"); }
+/* "Divided by zero." */
+_Noreturn void jawa_rt_panic_div_zero(void) { fail("dibagi nol"); }
 
 /*===----------------------------------------------------------------------===
  * Memory
@@ -62,14 +65,14 @@ _Noreturn void jawa_rt_panic_div_zero(void) { fail("division by zero"); }
 void *jawa_rt_alloc(int64_t size) {
   void *memory = GC_MALLOC((size_t)size);
   if (!memory)
-    fail("out of memory");
+    fail("memori entek"); /* out of memory */
   return memory;
 }
 
 void *jawa_rt_alloc_atomic(int64_t size) {
   void *memory = GC_MALLOC_ATOMIC((size_t)size);
   if (!memory)
-    fail("out of memory");
+    fail("memori entek"); /* out of memory */
   return memory;
 }
 
@@ -201,7 +204,7 @@ int64_t jawa_rt_str_to_int(const jawa_str *text) {
     if (errno == 0 && stop == end)
       return value;
   }
-  fail("cannot read \"%s\" as a wilangan", text->data);
+  fail("\"%s\" dudu wilangan", text->data); /* "... is not a wilangan" */
 }
 
 double jawa_rt_str_to_float(const jawa_str *text) {
@@ -213,7 +216,7 @@ double jawa_rt_str_to_float(const jawa_str *text) {
     if (stop == end)
       return value;
   }
-  fail("cannot read \"%s\" as a pecahan", text->data);
+  fail("\"%s\" dudu pecahan", text->data); /* "... is not a pecahan" */
 }
 
 /*===----------------------------------------------------------------------===
