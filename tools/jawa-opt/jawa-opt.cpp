@@ -10,6 +10,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "jawa/Dialect/Jawa/IR/Jawa.h"
+#include "jawa/Dialect/Jawa/Transforms/Passes.h"
 
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
 #include "mlir/Dialect/Func/Extensions/InlinerExtension.h"
@@ -25,6 +26,7 @@ int main(int argc, char **argv) {
                   mlir::cf::ControlFlowDialect, mlir::LLVM::LLVMDialect>();
   mlir::func::registerInlinerExtension(registry);
   mlir::registerTransformsPasses();
+  mlir::jawa::registerJawaPasses();
 
   return mlir::asMainReturnCode(
       mlir::MlirOptMain(argc, argv, "Jawa optimizer driver\n", registry));
