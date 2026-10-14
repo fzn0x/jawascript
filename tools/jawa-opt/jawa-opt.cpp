@@ -12,6 +12,7 @@
 #include "jawa/Conversion/Passes.h"
 #include "jawa/Dialect/Jawa/IR/Jawa.h"
 #include "jawa/Dialect/Jawa/Transforms/Passes.h"
+#include "jawa/Pipeline/Pipeline.h"
 
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
@@ -49,6 +50,7 @@ int main(int argc, char **argv) {
   mlir::registerTransformsPasses();
   mlir::jawa::registerJawaPasses();
   mlir::jawa::registerJawaConversionPasses();
+  mlir::jawa::registerJawaPipelines();
 
   return mlir::asMainReturnCode(
       mlir::MlirOptMain(argc, argv, "Jawa optimizer driver\n", registry));
