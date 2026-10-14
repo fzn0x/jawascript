@@ -1,0 +1,132 @@
+<main id="main" class="home">
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Nulis program nganggo basa&nbsp;Jawa.</h1>
+    <p class="lede">Write programs in Javanese. JawaScript keeps the punctuation of JavaScript and TypeScript, swaps the keywords for everyday Javanese words, and compiles to native code through MLIR and&nbsp;LLVM.</p>
+    <div class="actions">
+      <a class="button primary" href="guide.html">Start the tour</a>
+      <a class="button" href="vocabulary.html">Browse the vocabulary</a>
+    </div>
+  </div>
+  <figure class="hero-art">
+    <picture>
+      <source media="(prefers-reduced-motion: reduce)" srcset="assets/jawac-cmd-static.svg">
+      <img src="assets/jawac-cmd.svg" width="920" height="404" alt="A code editor showing fib.jw, a Jawa program that prints Fibonacci numbers, next to a Command Prompt where jawac run fib.jw prints fib(0) = 0 through fib(9) = 34.">
+    </picture>
+  </figure>
+</section>
+
+<section class="band">
+  <div class="band-text">
+    <h2>Read it like Javanese</h2>
+    <p>Every keyword is an ordinary word of everyday Javanese, so a line of Jawa can be glossed word by word, the way linguists write out a sentence.</p>
+  </div>
+  <figure class="gloss" aria-label="A line of Jawa with an English gloss under each word">
+    <div class="gloss-line">
+      <span class="gloss-unit"><code><span class="t-keyword">yen</span></code><i>if</i></span>
+      <span class="gloss-unit"><code>umur</code><i>age</i></span>
+      <span class="gloss-unit"><code><span class="t-operator">&gt;=</span></code><i>at least</i></span>
+      <span class="gloss-unit"><code><span class="t-number">18</span></code><i>18</i></span>
+      <span class="gloss-unit"><code><span class="t-punct">{</span> <span class="t-function">tulis</span><span class="t-punct">(</span></code><i>write</i></span>
+      <span class="gloss-unit"><code><span class="t-string">"wis</span></code><i>already</i></span>
+      <span class="gloss-unit"><code><span class="t-string">diwasa"</span><span class="t-punct">)</span> <span class="t-punct">}</span></code><i>adult</i></span>
+    </div>
+    <figcaption>
+      <p class="gloss-free">&lsquo;If age is at least 18, write &ldquo;already an adult&rdquo;.&rsquo;</p>
+      <p class="gloss-js"><span>In JavaScript</span> <code><span class="t-keyword">if</span> <span class="t-punct">(</span>umur <span class="t-operator">&gt;=</span> <span class="t-number">18</span><span class="t-punct">)</span> <span class="t-punct">{</span> <span class="t-function">console</span><span class="t-punct">.</span><span class="t-function">log</span><span class="t-punct">(</span><span class="t-string">"wis diwasa"</span><span class="t-punct">)</span> <span class="t-punct">}</span></code></p>
+    </figcaption>
+  </figure>
+</section>
+
+<section class="band">
+  <div class="band-text">
+    <h2>The shape of TypeScript</h2>
+    <p>Braces, types after a colon, <code>T[]</code> arrays, template strings, <code>&amp;&amp;</code> and <code>i++</code> all work the way you expect. The words change; the program does not.</p>
+    <p><a href="reference.html#coming-from-javascript-or-typescript">Every difference, side by side</a></p>
+  </div>
+  <div class="compare">
+<pre><code class="language-js">interface Wong {
+    jeneng: string;
+    umur: number;
+}
+
+function diwasa(wong: Wong[]): string[] {
+    const asil: string[] = [];
+    for (const w of wong) {
+        if (w.umur &gt;= 18) {
+            asil.push(w.jeneng);
+        }
+    }
+    return asil;
+}
+</code></pre>
+<pre><code class="language-ts">wujud Wong {
+    jeneng: ukara
+    umur: wilangan
+}
+
+gawe diwasa(wong: Wong[]): ukara[] {
+    tetep asil: ukara[] = []
+    kanggo (tetep w ing wong) {
+        yen (w.umur &gt;= 18) {
+            tambah(asil, w.jeneng)
+        }
+    }
+    bali asil
+}
+</code></pre>
+  </div>
+</section>
+
+<section class="band">
+  <div class="band-text">
+    <h2>Compiled, not interpreted</h2>
+    <p><code>jawac</code> is a real compiler. A Rust frontend checks types and builds its own MLIR dialect, Jawa passes and LLVM optimize it, and the result links into a native executable with a garbage collector for memory.</p>
+    <p><a href="architecture.html">Follow a program through the compiler</a></p>
+  </div>
+  {{pipeline}}
+</section>
+
+<section class="band">
+  <div class="band-text">
+    <h2>Mistakes, explained</h2>
+    <p>The compiler reports every error in a file at once. Type a JavaScript word out of habit and it names the Jawa one; a program that fails while running says why, in Javanese.</p>
+  </div>
+<pre><code class="language-console">$ jawac check salah.jw
+error: `let` is not a Jawa keyword
+ --&gt; salah.jw:2:5
+  |
+2 |     let umur = 20
+  |     ^^^
+  = note: Jawa writes `let` as `ayo`
+error: could not compile `salah.jw` because of 1 error
+
+$ jawac run indeks.jw
+gagal: indeks 3 ora ana ing larik sing dawane 3
+</code></pre>
+</section>
+
+<section class="band">
+  <div class="band-text">
+    <h2>Try it</h2>
+    <p>Build from source on Windows (MSYS2) or Linux with Clang, MLIR, LLVM, Rust and the Boehm collector. The <a href="https://github.com/fzn0x/jawascript#getting-started">README</a> lists the packages for each.</p>
+  </div>
+<pre><code class="language-sh">git clone https://github.com/fzn0x/jawascript.git
+cd jawascript
+scripts/build.sh
+build/bin/jawac run examples/sugeng_rawuh.jw
+</code></pre>
+</section>
+
+<section class="docs-index" aria-labelledby="docs-title">
+  <h2 id="docs-title">Read the docs</h2>
+  <ul>
+    <li><a href="guide.html"><b>Pandhuan</b><span class="en">Guide</span><span class="about">A first tour, from a first program to structs and linked lists.</span></a></li>
+    <li><a href="vocabulary.html"><b>Kosakata</b><span class="en">Vocabulary</span><span class="about">Every Jawa word, what it means and its JavaScript counterpart.</span></a></li>
+    <li><a href="reference.html"><b>Referensi</b><span class="en">Reference</span><span class="about">The whole language: types, expressions, statements and built-ins.</span></a></li>
+    <li><a href="architecture.html"><b>Arsitektur</b><span class="en">Architecture</span><span class="about">How jawac turns a .jw file into machine code.</span></a></li>
+  </ul>
+</section>
+
+</main>
