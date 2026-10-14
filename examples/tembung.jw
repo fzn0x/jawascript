@@ -1,6 +1,6 @@
 // Working with text (ukara): joining, comparing, converting and measuring.
 
-gawe baleni(teks: ukara, kaping: wilangan) -> ukara {
+gawe baleni(teks: ukara, kaping: wilangan): ukara {
     ayo asil = ""
     kanggo i ing 0..kaping {
         asil += teks

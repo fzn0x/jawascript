@@ -1,7 +1,7 @@
 // Prime numbers below 100 with the sieve of Eratosthenes.
 
-gawe saringan(wates: wilangan) -> [wilangan] {
-    ayo prima: [logika] = []
+gawe saringan(wates: wilangan): wilangan[] {
+    ayo prima: logika[] = []
     kanggo i ing 0..wates {
         tambah(prima, i >= 2)
     }
@@ -17,7 +17,7 @@ gawe saringan(wates: wilangan) -> [wilangan] {
         i += 1
     }
 
-    ayo asil: [wilangan] = []
+    ayo asil: wilangan[] = []
     kanggo n ing 0..wates {
         yen prima[n] {
             tambah(asil, n)

@@ -1,8 +1,8 @@
 // The Collatz sequence: halve even numbers, triple odd ones and add one,
 // until reaching 1.
 
-gawe langkah(n: wilangan) -> wilangan {
-    yen n % 2 == 0 {
+gawe langkah(n: wilangan): wilangan {
+    yen (n % 2 === 0) {
         bali n / 2
     }
     bali 3 * n + 1
@@ -12,13 +12,13 @@ gawe utama() {
     ayo n = 27
     ayo cacah = 0
     ayo paling_dhuwur = n
-    sajrone n != 1 {
+    sajrone (n !== 1) {
         n = langkah(n)
-        cacah += 1
-        yen n > paling_dhuwur {
+        cacah++
+        yen (n > paling_dhuwur) {
             paling_dhuwur = n
         }
     }
-    tulis("27 tekan 1 sawise", cacah, "langkah")
+    tulis(`27 tekan 1 sawise ${cacah} langkah`)
     tulis("angka paling dhuwur:", paling_dhuwur)
 }

@@ -8,7 +8,7 @@
 
 // Days since 1 January 1970 for a date in the proleptic Gregorian calendar
 // (Howard Hinnant's days_from_civil).
-gawe dina_saka_epoch(taun: wilangan, sasi: wilangan, tanggal: wilangan) -> wilangan {
+gawe dina_saka_epoch(taun: wilangan, sasi: wilangan, tanggal: wilangan): wilangan {
     ayo y = taun
     yen sasi <= 2 {
         y -= 1
@@ -28,7 +28,7 @@ gawe dina_saka_epoch(taun: wilangan, sasi: wilangan, tanggal: wilangan) -> wilan
 }
 
 // A remainder that is never negative, for dates before 1970.
-gawe modulo(a: wilangan, b: wilangan) -> wilangan {
+gawe modulo(a: wilangan, b: wilangan): wilangan {
     bali (a % b + b) % b
 }
 
@@ -43,7 +43,7 @@ gawe weton(taun: wilangan, sasi: wilangan, tanggal: wilangan) {
     tetep d = modulo(n, 7)
     tetep p = modulo(n + 3, 5)
     tetep neptu = neptu_dina[d] + neptu_pasaran[p]
-    tulis(ukara(tanggal) + "-" + sasi + "-" + taun + ":", dina[d], pasaran[p] + ", neptu", neptu)
+    tulis(`${tanggal}-${sasi}-${taun}: ${dina[d]} ${pasaran[p]}, neptu ${neptu}`)
 }
 
 gawe utama() {

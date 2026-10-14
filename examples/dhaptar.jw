@@ -10,14 +10,14 @@ wujud Simpul {
     sabanjure: Simpul
 }
 
-gawe jarak_kuadrat(a: Titik, b: Titik) -> pecahan {
+gawe jarak_kuadrat(a: Titik, b: Titik): pecahan {
     tetep dx = a.x - b.x
     tetep dy = a.y - b.y
     bali dx * dx + dy * dy
 }
 
 // Builds 1 -> 2 -> ... -> n, with `kosong` (null) at the end.
-gawe gawe_dhaptar(n: wilangan) -> Simpul {
+gawe gawe_dhaptar(n: wilangan): Simpul {
     ayo sirah: Simpul = kosong
     ayo i = n
     sajrone i > 0 {
@@ -27,7 +27,7 @@ gawe gawe_dhaptar(n: wilangan) -> Simpul {
     bali sirah
 }
 
-gawe jumlah(dhaptar: Simpul) -> wilangan {
+gawe jumlah(dhaptar: Simpul): wilangan {
     ayo total = 0
     ayo simpul = dhaptar
     sajrone simpul != kosong {
