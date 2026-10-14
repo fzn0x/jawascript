@@ -1,0 +1,37 @@
+name: Bug report
+description: jawac rejects a valid program, accepts an invalid one, crashes, or a compiled program misbehaves.
+labels: [bug]
+body:
+  - type: textarea
+    id: program
+    attributes:
+      label: Jawa program
+      description: The smallest program that shows the problem.
+      render: rust
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: The compiler's messages, the program's output, or the crash. Include the command you ran.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: jawac version
+      description: The output of `jawac --version`, or the commit you built.
+      placeholder: jawac 0.1.0 (commit 1a2b3c4)
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: Ubuntu 24.04 with LLVM 23 from apt.llvm.org, or Windows 11 with MSYS2 UCRT64

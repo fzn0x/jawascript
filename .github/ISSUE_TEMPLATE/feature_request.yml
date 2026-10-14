@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest a language feature, a built-in, an optimization or a tooling improvement.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to write, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you'd like
+      description: Example Jawa code helps a lot. For new keywords, suggest a Javanese word and what it means.
+      render: rust
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
