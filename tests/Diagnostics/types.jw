@@ -40,8 +40,8 @@ gawe utama() {
     tulis(Titik { x: 1, y: 2 })
 
     // CHECK: error: cannot tell the element type of an empty array
-    // CHECK: = note: add a type, such as `ayo xs: [wilangan] = []`
-    ayo xs = []
+    // CHECK: = note: add a type, such as `ayo larik: [wilangan] = []`
+    ayo larik = []
 
     // CHECK: error: cannot assign to `t`, it does not change
     // CHECK: = note: declare it with `ayo` instead of `tetep` to change it

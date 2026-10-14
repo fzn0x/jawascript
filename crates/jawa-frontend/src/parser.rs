@@ -1027,11 +1027,17 @@ impl Parser {
                     self.advance();
                     let field = self.ident("after `.`")?;
                     if self.at(&TokenKind::LParen) {
-                        let note = if matches!(&expr.kind, ExprKind::Name(base) if base == "console")
-                        {
-                            "print with `tulis(…)`".to_string()
-                        } else {
-                            format!("call it as a function instead: `{}(value, …)`", field.name)
+                        let note = match &expr.kind {
+                            ExprKind::Name(base) if base == "console" => {
+                                "print with `tulis(…)`".to_string()
+                            }
+                            ExprKind::Name(base) => {
+                                format!(
+                                    "call it as a function instead: `{}({base}, …)`",
+                                    field.name
+                                )
+                            }
+                            _ => format!("call it as a function instead: `{}(…)`", field.name),
                         };
                         let diag = Diagnostic::error(field.span, "methods are not supported")
                             .with_note(note);
@@ -1352,7 +1358,7 @@ mod tests {
     #[test]
     fn struct_literal_except_in_headers() {
         assert_eq!(expr_of("Titik { x: 1, y: 2 }"), "(Titik x=1 y=2)");
-        let program = parse_ok("gawe utama() { yen ok { tulis(1) } }");
+        let program = parse_ok("gawe utama() { yen apik { tulis(1) } }");
         assert!(matches!(body(&program)[0].kind, StmtKind::If { .. }));
     }
 
@@ -1461,7 +1467,7 @@ mod tests {
                 y: pecahan
             }
             wujud Simpul { regane: wilangan, sabanjure: Simpul }
-            gawe dawa(t: Titik, xs: [[wilangan]]) -> pecahan { bali t.x }",
+            gawe dawa(t: Titik, larik: [[wilangan]]) -> pecahan { bali t.x }",
         );
         assert_eq!(program.items.len(), 3);
         let Item::Struct(titik) = &program.items[0] else {
@@ -1525,11 +1531,16 @@ mod tests {
 
     #[test]
     fn rejects_methods_with_a_hint() {
-        let parsed = parse("gawe utama() { xs.tambah(1) }");
+        let parsed = parse("gawe utama() { larik.tambah(1) }");
         assert_eq!(parsed.diagnostics[0].message, "methods are not supported");
         assert_eq!(
             parsed.diagnostics[0].notes,
-            ["call it as a function instead: `tambah(value, …)`"]
+            ["call it as a function instead: `tambah(larik, …)`"]
+        );
+        let parsed = parse("gawe utama() { [1].tambah(2) }");
+        assert_eq!(
+            parsed.diagnostics[0].notes,
+            ["call it as a function instead: `tambah(…)`"]
         );
     }
 
@@ -1563,7 +1574,7 @@ mod tests {
 
     #[test]
     fn typescript_style_types() {
-        let program = parse_ok("gawe f(xs: wilangan[][], n: wilangan): ukara[] { bali [] }");
+        let program = parse_ok("gawe f(larik: wilangan[][], n: wilangan): ukara[] { bali [] }");
         let Item::Function(f) = &program.items[0] else {
             panic!()
         };
@@ -1616,7 +1627,7 @@ mod tests {
 
     #[test]
     fn increment_and_decrement_statements() {
-        let program = parse_ok("gawe utama() { i++; --j; xs[0]++ }");
+        let program = parse_ok("gawe utama() { i++; --j; larik[0]++ }");
         let ops: Vec<_> = body(&program)
             .iter()
             .map(|stmt| match &stmt.kind {
@@ -1650,7 +1661,7 @@ mod tests {
             "gawe utama() {
                 kanggo (ayo i = 0; i < 10; i++) { }
                 kanggo (;;) { mandheg }
-                kanggo (tetep x ing xs) { }
+                kanggo (tetep x ing larik) { }
                 kanggo (i ing 0..3) { }
             }",
         );

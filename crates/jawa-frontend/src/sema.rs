@@ -939,11 +939,16 @@ impl Checker {
         if let Some(builtin) = Builtin::from_name(name) {
             return self.builtin(builtin, args, span);
         }
-        if self.struct_index.contains_key(name) {
+        if let Some(&index) = self.struct_index.get(name) {
+            let fields: Vec<String> = self.structs[index]
+                .fields
+                .iter()
+                .map(|field| format!("{}: …", field.name))
+                .collect();
             self.error_with_note(
                 callee.span,
                 format!("`{name}` is a struct, not a function"),
-                format!("build one with `{name} {{ field: value, … }}`"),
+                format!("build one with `{name} {{ {} }}`", fields.join(", ")),
             );
         } else {
             let mut candidates: Vec<&str> = self.functions.keys().map(String::as_str).collect();
@@ -1105,7 +1110,7 @@ impl Checker {
                     self.error_with_note(
                         span,
                         "cannot tell the element type of an empty array",
-                        "add a type, such as `ayo xs: [wilangan] = []`",
+                        "add a type, such as `ayo larik: [wilangan] = []`",
                     );
                     error_expr(span)
                 }
@@ -1123,7 +1128,7 @@ impl Checker {
                     self.error_with_note(
                         first.span,
                         "cannot tell which struct this `kosong` is",
-                        "add a type, such as `ayo xs: [Simpul] = [kosong]`",
+                        "add a type, such as `ayo larik: [Simpul] = [kosong]`",
                     );
                     Ty::Error
                 }
@@ -1432,12 +1437,12 @@ mod tests {
                 bali fib(n - 1) + fib(n - 2)
             }
             gawe utama() {
-                ayo xs = [1, 2, 3]
-                tambah(xs, fib(10))
+                ayo larik = [1, 2, 3]
+                tambah(larik, fib(10))
                 ayo p = Titik { y: 2, x: 1 }
                 p.x += 5
-                kanggo i ing 0..dawane(xs) { tulis(xs[i], p.x) }
-                kanggo x ing xs { yen x == 2 { terusna } }
+                kanggo i ing 0..dawane(larik) { tulis(larik[i], p.x) }
+                kanggo x ing larik { yen x == 2 { terusna } }
             }
         ");
         assert_eq!(program.functions.len(), 2);
@@ -1479,7 +1484,7 @@ mod tests {
     #[test]
     fn integer_literals_adapt_to_floats() {
         let program = ok(&in_utama(
-            "ayo x: pecahan = 1\nayo y = x * 2\nayo zs: [pecahan] = [1, 2.5]",
+            "ayo x: pecahan = 1\nayo y = x * 2\nayo larik: [pecahan] = [1, 2.5]",
         ));
         let stmts = &program.functions[0].body.stmts;
         let StmtKind::Let { init, .. } = &stmts[1].kind else {
@@ -1582,16 +1587,16 @@ mod tests {
     #[test]
     fn empty_arrays_need_a_type() {
         assert_eq!(
-            messages(&in_utama("ayo xs = []")),
+            messages(&in_utama("ayo larik = []")),
             ["cannot tell the element type of an empty array"]
         );
-        ok(&in_utama("ayo xs: [wilangan] = []\ntambah(xs, 1)"));
+        ok(&in_utama("ayo larik: [wilangan] = []\ntambah(larik, 1)"));
     }
 
     #[test]
     fn template_strings_join_their_parts() {
         let program = ok(&in_utama(
-            "ayo s = `n=${1} x=${2.5} ok=${bener} ${\"teks\"}`",
+            "ayo s = `n=${1} x=${2.5} apik=${bener} ${\"teks\"}`",
         ));
         let StmtKind::Let { init, .. } = &program.functions[0].body.stmts[0].kind else {
             panic!()
@@ -1678,7 +1683,7 @@ mod tests {
             "ayo a = wilangan(2.9)\nayo b = pecahan(a)\nayo c = ukara(b)\nayo d = wilangan(\"42\")\nayo e = logika(a)",
         ));
         assert_eq!(
-            messages(&in_utama("ayo xs = [1]\nayo s = ukara(xs)")),
+            messages(&in_utama("ayo larik = [1]\nayo s = ukara(larik)")),
             ["cannot convert `[wilangan]` to `ukara`"]
         );
     }

@@ -1,7 +1,7 @@
 // RUN: not jawac check %s 2>&1 | FileCheck %s
 
-// One run reports every syntax error: the parser skips the rest of a bad
-// statement and carries on.
+// Sepisan mlaku nglaporake kabeh kesalahan tata tulis: parser nglewati
+// sisane pratelan sing salah banjur nerusake.
 
 gawe utama() {
     // CHECK: error: expected `)` to close the argument list, found end of line
@@ -9,8 +9,8 @@ gawe utama() {
     tulis(1
     ayo x = 1
 
-    // There are no bitwise operators. A single `&` is reported once and the
-    // rest of the line still parses.
+    // Ora ana operator bit. `&` siji dilaporake sepisan lan sisane baris
+    // tetep diwaca.
     // CHECK: error: unexpected `&`; use `&&` or `lan` for logic
     // CHECK-NOT: error: expected `{`
     yen x > 0 & x < 9 {
@@ -18,7 +18,7 @@ gawe utama() {
     }
 
     // CHECK: error: methods are not supported
-    // CHECK: = note: call it as a function instead: `tambah(value, …)`
+    // CHECK: = note: call it as a function instead: `tambah(x, …)`
     x.tambah(1)
 
     // CHECK: error: expected `=` after the variable name, found end of line

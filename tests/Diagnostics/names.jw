@@ -16,7 +16,7 @@ gawe utama() {
     tuliss(1)
 
     // CHECK: error: `Simpul` is a struct, not a function
-    // CHECK: = note: build one with `Simpul { field: value, … }`
+    // CHECK: = note: build one with `Simpul { regane: … }`
     Simpul(1)
 
     // CHECK: error: `Simpul` has no field `regan`
