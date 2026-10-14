@@ -1,0 +1,5 @@
+Every program in the guide prints exactly what the guide says it prints.
+
+RUN: %python %jawa_src/scripts/check_docs.py %jawa_src/docs/guide.md | FileCheck %s
+CHECK: guide.md: {{[1-9][0-9]*}} examples
+CHECK-NOT: failed

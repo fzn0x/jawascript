@@ -26,3 +26,4 @@ tool_dirs = [config.jawa_tools_dir, config.llvm_tools_dir]
 llvm_config.add_tool_substitutions(["jawa-opt", "jawac"], tool_dirs)
 
 config.substitutions.append(("%examples", os.path.join(config.jawa_src_root, "examples")))
+config.substitutions.append(("%jawa_src", config.jawa_src_root))
