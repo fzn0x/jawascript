@@ -1,0 +1,79 @@
+// RUN: jawac run -O0 %s | FileCheck %s
+// RUN: jawac run -O2 %s | FileCheck %s
+
+gawe dicathet(teks: ukara, asil: logika) -> logika {
+    tulis("  evaluated", teks)
+    bali asil
+}
+
+gawe golek(xs: [wilangan], target: wilangan) -> wilangan {
+    kanggo i ing 0..dawane(xs) {
+        yen xs[i] == target {
+            bali i
+        }
+    }
+    bali -1
+}
+
+gawe utama() {
+    // `lan` and `utawa` skip their right side when the left decides.
+    // CHECK: salah
+    // CHECK-NOT: evaluated
+    tulis(salah lan dicathet("tengen", bener))
+    // CHECK: evaluated kiwa
+    // CHECK-NEXT: bener
+    tulis(dicathet("kiwa", bener) utawa dicathet("tengen", salah))
+
+    // `mandheg` and `terusna` affect only the innermost loop, and
+    // `terusna` in a `kanggo` still advances the counter.
+    ayo pasangan = ""
+    kanggo i ing 0..4 {
+        kanggo j ing 0..4 {
+            yen j == i {
+                terusna
+            }
+            yen j > 2 {
+                mandheg
+            }
+            pasangan += ukara(i) + ukara(j) + " "
+        }
+    }
+    // CHECK: 01 02 10 12 20 21 30 31 32
+    tulis(pasangan)
+
+    // `bali` from deep inside loops.
+    // CHECK-NEXT: 2 -1
+    tulis(golek([5, 7, 9], 9), golek([5, 7, 9], 4))
+
+    // `sajrone` with an early exit.
+    ayo n = 0
+    sajrone bener {
+        n += 1
+        yen n * n > 50 {
+            mandheg
+        }
+    }
+    // CHECK-NEXT: 8
+    tulis(n)
+
+    // Inclusive and empty ranges.
+    ayo hitungan = 0
+    kanggo i ing 1..=3 {
+        hitungan += i
+    }
+    kanggo i ing 5..2 {
+        hitungan += 100
+    }
+    // CHECK-NEXT: 6
+    tulis(hitungan)
+
+    // Shadowing in a nested block.
+    ayo x = 1
+    {
+        ayo x = "inner"
+        tulis(x)
+    }
+    // CHECK-NEXT: inner
+    // CHECK-NEXT: 1
+    tulis(x)
+}

@@ -1,0 +1,64 @@
+// Every runtime error prints `gagal: …` to stderr, after flushing what the
+// program printed so far, and exits with status 1.
+
+// RUN: split-file %s %t
+// RUN: not jawac run %t/index.jw 2>&1 | FileCheck %s --check-prefix=INDEX
+// RUN: not jawac run %t/negative.jw 2>&1 | FileCheck %s --check-prefix=NEGATIVE
+// RUN: not jawac run %t/null.jw 2>&1 | FileCheck %s --check-prefix=NULL
+// RUN: not jawac run %t/zero.jw 2>&1 | FileCheck %s --check-prefix=ZERO
+// RUN: not jawac run -O0 %t/zero.jw 2>&1 | FileCheck %s --check-prefix=ZERO
+// RUN: not jawac run %t/parse.jw 2>&1 | FileCheck %s --check-prefix=PARSE
+// RUN: not jawac run %t/gagal.jw 2>&1 | FileCheck %s --check-prefix=GAGAL
+
+//--- index.jw
+gawe utama() {
+    ayo xs = [1, 2, 3]
+    tulis("before")
+    tulis(xs[3])
+}
+// INDEX: before
+// INDEX-NEXT: gagal: index 3 is out of bounds for an array of length 3
+
+//--- negative.jw
+gawe utama() {
+    ayo xs = [1, 2, 3]
+    ayo i = -1
+    xs[i] = 0
+}
+// NEGATIVE: gagal: index -1 is out of bounds for an array of length 3
+
+//--- null.jw
+wujud Simpul {
+    regane: wilangan
+    sabanjure: Simpul
+}
+
+gawe utama() {
+    ayo n = Simpul { regane: 1, sabanjure: kosong }
+    tulis(n.sabanjure.regane)
+}
+// NULL: gagal: used a field of `kosong`
+
+//--- zero.jw
+gawe bagi(a: wilangan, b: wilangan) -> wilangan {
+    bali a / b
+}
+
+gawe utama() {
+    tulis(bagi(1, 1))
+    tulis(bagi(1, 0))
+}
+// ZERO: 1
+// ZERO-NEXT: gagal: division by zero
+
+//--- parse.jw
+gawe utama() {
+    tulis(wilangan("12abc"))
+}
+// PARSE: gagal: cannot read "12abc" as a wilangan
+
+//--- gagal.jw
+gawe utama() {
+    gagal("ora bisa diterusake: " + 42)
+}
+// GAGAL: gagal: ora bisa diterusake: 42

@@ -1,0 +1,39 @@
+// RUN: jawac run -O0 %s | FileCheck %s
+// RUN: jawac run -O2 %s | FileCheck %s
+
+wujud Titik {
+    x: pecahan
+    y: pecahan
+}
+
+wujud Wong {
+    jeneng: ukara
+    umur: wilangan
+    kanca: [Wong]
+    pasangan: Wong
+}
+
+gawe pindhah(t: Titik, dx: pecahan) {
+    t.x += dx
+}
+
+gawe utama() {
+    ayo t = Titik { y: 2, x: 1 }
+    pindhah(t, 0.5)
+    // CHECK: 1.5 2.0
+    tulis(t.x, t.y)
+
+    ayo sri = Wong { jeneng: "Sri", umur: 20, kanca: [], pasangan: kosong }
+    ayo joko = Wong { jeneng: "Joko", umur: 22, kanca: [sri], pasangan: sri }
+    sri.pasangan = joko
+    tambah(sri.kanca, joko)
+    // CHECK-NEXT: Joko Sri 1 1
+    tulis(sri.pasangan.jeneng, joko.pasangan.jeneng, dawane(sri.kanca), dawane(joko.kanca))
+    // CHECK-NEXT: bener bener salah
+    tulis(sri.pasangan.pasangan == sri, joko.kanca[0] == sri, sri == joko)
+
+    // `kosong` compares equal only to itself.
+    ayo ora_ana: Wong = kosong
+    // CHECK-NEXT: bener salah
+    tulis(ora_ana == kosong, sri == kosong)
+}

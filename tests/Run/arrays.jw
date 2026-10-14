@@ -1,0 +1,55 @@
+// RUN: jawac run -O0 %s | FileCheck %s
+// RUN: jawac run -O2 %s | FileCheck %s
+
+gawe jumlah(xs: [wilangan]) -> wilangan {
+    ayo total = 0
+    kanggo x ing xs {
+        total += x
+    }
+    bali total
+}
+
+gawe utama() {
+    ayo xs = [3, 1, 2]
+    // CHECK: [3, 1, 2] 3 6
+    tulis(xs, dawane(xs), jumlah(xs))
+
+    xs[1] = 10
+    xs[0] += 1
+    tambah(xs, 5)
+    // CHECK-NEXT: [4, 10, 2, 5] 4
+    tulis(xs, dawane(xs))
+
+    // Arrays grow past their first capacity.
+    ayo gedhe: [wilangan] = []
+    kanggo i ing 0..1000 {
+        tambah(gedhe, i)
+    }
+    // CHECK-NEXT: 1000 999 499500
+    tulis(dawane(gedhe), gedhe[999], jumlah(gedhe))
+
+    // Arrays are references.
+    ayo kanca = xs
+    kanca[0] = 99
+    // CHECK-NEXT: 99
+    tulis(xs[0])
+
+    // A loop over an array sees elements appended while it runs.
+    ayo antrian = [1]
+    kanggo x ing antrian {
+        yen x < 4 {
+            tambah(antrian, x + 1)
+        }
+    }
+    // CHECK-NEXT: [1, 2, 3, 4]
+    tulis(antrian)
+
+    // Every printable element type, and arrays of arrays.
+    // CHECK-NEXT: [1.5, 2.0] [bener, salah] ["a", "b\"c"] []
+    ayo kosongan: [ukara] = []
+    tulis([1.5, 2], [bener, salah], ["a", "b\"c"], kosongan)
+    ayo grid = [[1, 2], [3, 4]]
+    grid[1][0] = 30
+    // CHECK-NEXT: [30, 4] 2
+    tulis(grid[1], dawane(grid))
+}

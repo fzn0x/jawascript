@@ -1,0 +1,51 @@
+// RUN: jawac run -O0 %s | FileCheck %s
+// RUN: jawac run -O2 %s | FileCheck %s
+
+gawe kurang(a: wilangan, b: wilangan) -> wilangan {
+    bali a - b
+}
+
+gawe utama() {
+    // Integer division truncates toward zero; the remainder takes the sign
+    // of the dividend.
+    // CHECK: 3 -3 -3 3
+    tulis(7 / 2, -7 / 2, 7 / -2, -7 / -2)
+    // CHECK-NEXT: 1 -1 1 -1
+    tulis(7 % 3, -7 % 3, 7 % -3, -7 % -3)
+
+    // Integers wrap on overflow, and MIN / -1 wraps instead of trapping.
+    ayo paling_gedhe = 9223372036854775807
+    ayo paling_cilik = -9223372036854775808
+    // CHECK-NEXT: -9223372036854775808 9223372036854775807
+    tulis(paling_gedhe + 1, kurang(paling_cilik, 1))
+    ayo min_siji = -1
+    // CHECK-NEXT: -9223372036854775808 0
+    tulis(paling_cilik / min_siji, paling_cilik % min_siji)
+
+    // Precedence: * / % before + -, comparisons before ora, ora before lan.
+    // CHECK-NEXT: 14 20 bener salah
+    tulis(2 + 3 * 4, (2 + 3) * 4, ora 1 > 2, ora bener lan bener)
+
+    // Floats follow IEEE 754.
+    ayo nol = 0.0
+    // CHECK-NEXT: 0.30000000000000004 inf -inf nan
+    tulis(0.1 + 0.2, 1.0 / nol, -1.0 / nol, nol / nol)
+    // CHECK-NEXT: 2.5 -2.5 1.0 0.5
+    tulis(5.0 / 2, -5.0 / 2, 5.5 % 1.5, -(-0.5))
+    // CHECK-NEXT: salah bener
+    tulis(nol / nol == nol / nol, nol / nol != nol / nol)
+
+    // Conversions.
+    // CHECK-NEXT: 3 -3 9223372036854775807 0 1 7.0
+    tulis(wilangan(3.99), wilangan(-3.99), wilangan(1e300), wilangan(nol / nol), wilangan(bener), pecahan(7))
+
+    // Compound assignment.
+    ayo x = 10
+    x += 5
+    x -= 3
+    x *= 4
+    x /= 6
+    x %= 5
+    // CHECK-NEXT: 3
+    tulis(x)
+}
