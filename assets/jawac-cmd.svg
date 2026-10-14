@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="404" viewBox="0 0 920 404" role="img" aria-labelledby="title desc">
+<title id="title">JawaScript: jawac run fib.jw</title>
+<desc id="desc">A code editor showing fib.jw, a Fibonacci program written in Jawa with Javanese keywords, next to a Command Prompt window in which `jawac run fib.jw` prints fib(0) = 0 through fib(9) = 34.</desc>
+<defs><filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/></filter><clipPath id="editor-clip"><rect x="16" y="16" width="434" height="318" rx="10"/></clipPath><clipPath id="cmd-clip"><rect x="418" y="74" width="486" height="312" rx="8"/></clipPath></defs>
+<g font-family="'Cascadia Mono', 'Cascadia Code', Consolas, 'SF Mono', Menlo, 'DejaVu Sans Mono', monospace" font-size="14">
+<g filter="url(#shadow)"><rect x="16" y="16" width="434" height="318" rx="10" fill="#1C1A17"/></g>
+<g clip-path="url(#editor-clip)">
+<rect x="16" y="16" width="434" height="36" fill="#2B2823"/>
+<circle cx="36" cy="34.0" r="5.5" fill="#E2685F"/>
+<circle cx="54" cy="34.0" r="5.5" fill="#E8B04B"/>
+<circle cx="72" cy="34.0" r="5.5" fill="#7FBF6A"/>
+<text x="233.0" y="38.5" text-anchor="middle" font-size="13" fill="#B7AE9F">fib.jw</text>
+<text x="52" y="82" text-anchor="end" fill="#6B6359">1</text>
+<text x="68" y="82"><tspan fill="#E8B04B">gawe</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#8FB8F0">fib</tspan><tspan fill="#A9A193">(</tspan><tspan fill="#DAD3C6">n</tspan><tspan fill="#A9A193">:</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#63C5B1">wilangan</tspan><tspan fill="#A9A193">)</tspan><tspan fill="#A9A193">:</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#63C5B1">wilangan</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">{</tspan></text>
+<text x="52" y="103" text-anchor="end" fill="#6B6359">2</text>
+<text x="68" y="103"><tspan fill="#DAD3C6">    </tspan><tspan fill="#E8B04B">yen</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">(</tspan><tspan fill="#DAD3C6">n</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">&lt;</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#F2A07B">2</tspan><tspan fill="#A9A193">)</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">{</tspan></text>
+<text x="52" y="124" text-anchor="end" fill="#6B6359">3</text>
+<text x="68" y="124"><tspan fill="#DAD3C6">        </tspan><tspan fill="#E8B04B">bali</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#DAD3C6">n</tspan></text>
+<text x="52" y="145" text-anchor="end" fill="#6B6359">4</text>
+<text x="68" y="145"><tspan fill="#DAD3C6">    </tspan><tspan fill="#A9A193">}</tspan></text>
+<text x="52" y="166" text-anchor="end" fill="#6B6359">5</text>
+<text x="68" y="166"><tspan fill="#DAD3C6">    </tspan><tspan fill="#E8B04B">bali</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#8FB8F0">fib</tspan><tspan fill="#A9A193">(</tspan><tspan fill="#DAD3C6">n</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">-</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#F2A07B">1</tspan><tspan fill="#A9A193">)</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">+</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#8FB8F0">fib</tspan><tspan fill="#A9A193">(</tspan><tspan fill="#DAD3C6">n</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">-</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#F2A07B">2</tspan><tspan fill="#A9A193">)</tspan></text>
+<text x="52" y="187" text-anchor="end" fill="#6B6359">6</text>
+<text x="68" y="187"><tspan fill="#A9A193">}</tspan></text>
+<text x="52" y="208" text-anchor="end" fill="#6B6359">7</text>
+<text x="52" y="229" text-anchor="end" fill="#6B6359">8</text>
+<text x="68" y="229"><tspan fill="#E8B04B">gawe</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#8FB8F0">utama</tspan><tspan fill="#A9A193">(</tspan><tspan fill="#A9A193">)</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">{</tspan></text>
+<text x="52" y="250" text-anchor="end" fill="#6B6359">9</text>
+<text x="68" y="250"><tspan fill="#DAD3C6">    </tspan><tspan fill="#E8B04B">kanggo</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">(</tspan><tspan fill="#E8B04B">ayo</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#DAD3C6">i</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">=</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#F2A07B">0</tspan><tspan fill="#A9A193">;</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#DAD3C6">i</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">&lt;</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#F2A07B">10</tspan><tspan fill="#A9A193">;</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#DAD3C6">i</tspan><tspan fill="#A9A193">+</tspan><tspan fill="#A9A193">+</tspan><tspan fill="#A9A193">)</tspan><tspan fill="#DAD3C6"> </tspan><tspan fill="#A9A193">{</tspan></text>
+<text x="52" y="271" text-anchor="end" fill="#6B6359">10</text>
+<text x="68" y="271"><tspan fill="#DAD3C6">        </tspan><tspan fill="#8FB8F0">tulis</tspan><tspan fill="#A9A193">(</tspan><tspan fill="#A6CC70">`</tspan><tspan fill="#A6CC70">fib(</tspan><tspan fill="#E88AA0">${</tspan><tspan fill="#DAD3C6">i</tspan><tspan fill="#E88AA0">}</tspan><tspan fill="#A6CC70">) = </tspan><tspan fill="#E88AA0">${</tspan><tspan fill="#8FB8F0">fib</tspan><tspan fill="#A9A193">(</tspan><tspan fill="#DAD3C6">i</tspan><tspan fill="#A9A193">)</tspan><tspan fill="#E88AA0">}</tspan><tspan fill="#A6CC70">`</tspan><tspan fill="#A9A193">)</tspan></text>
+<text x="52" y="292" text-anchor="end" fill="#6B6359">11</text>
+<text x="68" y="292"><tspan fill="#DAD3C6">    </tspan><tspan fill="#A9A193">}</tspan></text>
+<text x="52" y="313" text-anchor="end" fill="#6B6359">12</text>
+<text x="68" y="313"><tspan fill="#A9A193">}</tspan></text>
+</g>
+<g filter="url(#shadow)"><rect x="418" y="74" width="486" height="312" rx="8" fill="#0C0C0C"/></g>
+<g clip-path="url(#cmd-clip)">
+<rect x="418" y="74" width="486" height="34" fill="#1F1F1F"/>
+<rect x="430" y="83" width="16" height="16" rx="3" fill="#3A3A3A"/>
+<text x="432.5" y="95.5" font-size="10" font-weight="bold" fill="#F2F2F2">&gt;_</text>
+<text x="456" y="95.5" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="12.5" fill="#E6E6E6">Command Prompt</text>
+<line x1="784" y1="91.0" x2="794" y2="91.0" stroke="#CFCFCF"/>
+<rect x="830" y="86.0" width="10" height="10" fill="none" stroke="#CFCFCF"/>
+<path d="M876 86.0l10 10M886 86.0l-10 10" stroke="#CFCFCF"/>
+<text x="436" y="136"><tspan fill="#CCCCCC">D:\jawascript&gt; </tspan><tspan fill="#E8B04B">j<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="0.700s" fill="freeze"/></tspan><tspan fill="#E8B04B">a<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="0.775s" fill="freeze"/></tspan><tspan fill="#E8B04B">w<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="0.850s" fill="freeze"/></tspan><tspan fill="#E8B04B">a<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="0.925s" fill="freeze"/></tspan><tspan fill="#E8B04B">c<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.000s" fill="freeze"/></tspan><tspan fill="#F2F2F2"> <animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.075s" fill="freeze"/></tspan><tspan fill="#F2F2F2">r<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.150s" fill="freeze"/></tspan><tspan fill="#F2F2F2">u<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.225s" fill="freeze"/></tspan><tspan fill="#F2F2F2">n<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.300s" fill="freeze"/></tspan><tspan fill="#F2F2F2"> <animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.375s" fill="freeze"/></tspan><tspan fill="#F2F2F2">f<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.450s" fill="freeze"/></tspan><tspan fill="#F2F2F2">i<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.525s" fill="freeze"/></tspan><tspan fill="#F2F2F2">b<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.600s" fill="freeze"/></tspan><tspan fill="#F2F2F2">.<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.675s" fill="freeze"/></tspan><tspan fill="#F2F2F2">j<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.750s" fill="freeze"/></tspan><tspan fill="#F2F2F2">w<animate attributeName="fill-opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="1.825s" fill="freeze"/></tspan></text>
+<text x="436" y="155.5" fill="#CCCCCC">fib(0) = 0<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="2.350s" fill="freeze"/></text>
+<text x="436" y="175.0" fill="#CCCCCC">fib(1) = 1<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="2.460s" fill="freeze"/></text>
+<text x="436" y="194.5" fill="#CCCCCC">fib(2) = 1<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="2.570s" fill="freeze"/></text>
+<text x="436" y="214.0" fill="#CCCCCC">fib(3) = 2<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="2.680s" fill="freeze"/></text>
+<text x="436" y="233.5" fill="#CCCCCC">fib(4) = 3<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="2.790s" fill="freeze"/></text>
+<text x="436" y="253.0" fill="#CCCCCC">fib(5) = 5<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="2.900s" fill="freeze"/></text>
+<text x="436" y="272.5" fill="#CCCCCC">fib(6) = 8<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="3.010s" fill="freeze"/></text>
+<text x="436" y="292.0" fill="#CCCCCC">fib(7) = 13<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="3.120s" fill="freeze"/></text>
+<text x="436" y="311.5" fill="#CCCCCC">fib(8) = 21<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="3.230s" fill="freeze"/></text>
+<text x="436" y="331.0" fill="#CCCCCC">fib(9) = 34<animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="3.340s" fill="freeze"/></text>
+<g><animate attributeName="opacity" values="0;1" keyTimes="0;1" calcMode="discrete" dur="3.800s" fill="freeze"/><text x="436" y="370.0" fill="#CCCCCC">D:\jawascript&gt; <tspan>█<animate attributeName="fill-opacity" values="1;1;0;0" keyTimes="0;0.5;0.5;1" dur="1.1s" begin="3.80s" repeatCount="indefinite"/></tspan></text></g>
+</g>
+</g>
+</svg>
