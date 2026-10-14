@@ -152,6 +152,24 @@ impl TokenKind {
         )
     }
 
+    /// Keywords that only ever begin a statement or an item.
+    pub fn only_starts_statements(&self) -> bool {
+        matches!(
+            self,
+            TokenKind::Ayo
+                | TokenKind::Tetep
+                | TokenKind::Yen
+                | TokenKind::Liyane
+                | TokenKind::Sajrone
+                | TokenKind::Kanggo
+                | TokenKind::Bali
+                | TokenKind::Mandheg
+                | TokenKind::Terusna
+                | TokenKind::Gawe
+                | TokenKind::Wujud
+        )
+    }
+
     pub fn is_terminator(&self) -> bool {
         matches!(self, TokenKind::Semi | TokenKind::Newline)
     }

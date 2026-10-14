@@ -227,6 +227,8 @@ fn compile(options: &Options) -> Result<i32, String> {
         diagnostics.extend(checked.diagnostics);
         Some(checked.program)
     };
+    // Report in source order, whichever stage found the problem.
+    diagnostics.sort_by_key(|diagnostic| diagnostic.span.start);
     for diagnostic in &diagnostics {
         eprint!("{}", diagnostic.render(&file, options.color));
     }

@@ -5,6 +5,11 @@
 //! statement (an identifier, a literal, `bali`, `mandheg`, `terusna`, or a
 //! closing `)`, `]` or `}`). Line breaks inside `(…)` and `[…]` never end a
 //! statement, so argument lists and array literals can span lines.
+//!
+//! The lexer also keeps one mistake from spoiling the rest of the file: a
+//! line that starts with a statement keyword such as `ayo` closes any `(` or
+//! `[` left open above it, and `&&`, `||` and `!` are reported but read as
+//! `lan`, `utawa` and `ora`.
 
 use crate::diag::Diagnostic;
 use crate::source::Span;
@@ -22,6 +27,7 @@ pub fn lex(text: &str) -> Lexed {
         tokens: Vec::new(),
         diagnostics: Vec::new(),
         delimiters: Vec::new(),
+        line_break_before: None,
     };
     lexer.run();
     Lexed {
@@ -37,6 +43,8 @@ struct Lexer<'a> {
     diagnostics: Vec<Diagnostic>,
     /// Open `(`, `[` and `{` tokens, innermost last.
     delimiters: Vec<TokenKind>,
+    /// Where the current line began, while no token is on it yet.
+    line_break_before: Option<usize>,
 }
 
 impl Lexer<'_> {
@@ -66,6 +74,7 @@ impl Lexer<'_> {
     }
 
     fn push(&mut self, kind: TokenKind, start: usize) {
+        self.line_break_before = None;
         self.tokens.push(Token {
             kind,
             span: Span::new(start, self.pos),
@@ -79,12 +88,15 @@ impl Lexer<'_> {
 
     /// Inserts a statement terminator for the line break at `at`, if the
     /// previous token can end a statement.
-    fn line_break(&mut self, at: usize) {
-        let inside_group = matches!(
+    fn inside_group(&self) -> bool {
+        matches!(
             self.delimiters.last(),
             Some(TokenKind::LParen | TokenKind::LBracket)
-        );
-        if inside_group {
+        )
+    }
+
+    fn line_break(&mut self, at: usize) {
+        if self.inside_group() {
             return;
         }
         if self
@@ -106,6 +118,7 @@ impl Lexer<'_> {
                 '\n' => {
                     self.bump();
                     self.line_break(start);
+                    self.line_break_before.get_or_insert(start);
                 }
                 c if c.is_whitespace() => {
                     self.bump();
@@ -158,6 +171,17 @@ impl Lexer<'_> {
         }
         let word = &self.text[start..self.pos];
         let kind = TokenKind::keyword(word).unwrap_or_else(|| TokenKind::Ident(word.to_string()));
+        // `ayo`, `yen` and friends never appear inside parentheses, so a line
+        // starting with one means a `(` or `[` above was never closed. Close
+        // it here and end the previous line, so the error stays on that line.
+        if kind.only_starts_statements() && self.inside_group() {
+            if let Some(line_break) = self.line_break_before {
+                while self.inside_group() {
+                    self.delimiters.pop();
+                }
+                self.line_break(line_break);
+            }
+        }
         self.push(kind, start);
     }
 
@@ -343,15 +367,21 @@ impl Lexer<'_> {
             '<' => TokenKind::Lt,
             '>' if self.eat('=') => TokenKind::Ge,
             '>' => TokenKind::Gt,
+            // C-style logic: report it, but read the Javanese word so the rest
+            // of the line still parses.
             '!' => {
                 self.error(start, "unexpected `!`; logical not is spelled `ora`");
-                return;
+                TokenKind::Ora
             }
-            '&' | '|' => {
-                let word = if c == '&' { "lan" } else { "utawa" };
-                self.eat(c);
-                self.error(start, format!("unexpected `{c}`; use `{word}` for logic"));
-                return;
+            '&' => {
+                self.eat('&');
+                self.error(start, "unexpected `&`; use `lan` for logic");
+                TokenKind::Lan
+            }
+            '|' => {
+                self.eat('|');
+                self.error(start, "unexpected `|`; use `utawa` for logic");
+                TokenKind::Utawa
             }
             other => {
                 self.error(start, format!("unexpected character `{other}`"));
@@ -516,10 +546,72 @@ mod tests {
 
     #[test]
     fn suggests_javanese_logic_words() {
-        let lexed = lex("yen a && b {}");
+        let lexed = lex("yen a && b || !c {}");
+        let messages: Vec<_> = lexed.diagnostics.iter().map(|d| &d.message).collect();
         assert_eq!(
-            lexed.diagnostics[0].message,
-            "unexpected `&`; use `lan` for logic"
+            messages,
+            [
+                "unexpected `&`; use `lan` for logic",
+                "unexpected `|`; use `utawa` for logic",
+                "unexpected `!`; logical not is spelled `ora`",
+            ]
+        );
+        // The rest of the line still reads as Jawa.
+        let kinds: Vec<_> = lexed.tokens.into_iter().map(|t| t.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                Yen,
+                ident("a"),
+                Lan,
+                ident("b"),
+                Utawa,
+                Ora,
+                ident("c"),
+                LBrace,
+                RBrace,
+                Newline,
+                Eof
+            ]
+        );
+    }
+
+    #[test]
+    fn statement_keyword_closes_a_forgotten_parenthesis() {
+        let lexed = lex("tulis(1\nayo x = 2\n");
+        let kinds: Vec<_> = lexed.tokens.into_iter().map(|t| t.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                ident("tulis"),
+                LParen,
+                Int(1),
+                Newline,
+                Ayo,
+                ident("x"),
+                Eq,
+                Int(2),
+                Newline,
+                Eof
+            ]
+        );
+    }
+
+    #[test]
+    fn values_on_new_lines_stay_inside_parentheses() {
+        assert_eq!(
+            kinds("f(\n  ora a,\n  bener\n)"),
+            vec![
+                ident("f"),
+                LParen,
+                Ora,
+                ident("a"),
+                Comma,
+                Bener,
+                RParen,
+                Newline,
+                Eof
+            ]
         );
     }
 

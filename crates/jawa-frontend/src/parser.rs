@@ -1226,7 +1226,7 @@ mod tests {
         assert_eq!(
             messages,
             [
-                "expected `)` to close the argument list, found `ayo`",
+                "expected `)` to close the argument list, found end of line",
                 "expected an expression, found `)`",
             ]
         );
