@@ -138,6 +138,11 @@ impl TokenKind {
                 | TokenKind::Bener
                 | TokenKind::Salah
                 | TokenKind::Kosong
+                | TokenKind::Wilangan
+                | TokenKind::Pecahan
+                | TokenKind::Logika
+                | TokenKind::Ukara
+                | TokenKind::Suwung
                 | TokenKind::Bali
                 | TokenKind::Mandheg
                 | TokenKind::Terusna
