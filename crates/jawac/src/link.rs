@@ -13,7 +13,7 @@ use std::process::Command;
 const RUNTIME_NAME: &str = "libjawa_rt.a";
 
 pub fn link(object: &Path, output: &Path) -> Result<(), String> {
-    let cc: OsString = env::var_os("JAWA_CC")
+    let cc: OsString = env_override("JAWA_CC")
         .or_else(|| option_env!("JAWA_DEFAULT_CC").map(OsString::from))
         .unwrap_or_else(|| OsString::from("cc"));
     let runtime = runtime_library()?;
@@ -46,7 +46,7 @@ pub fn link(object: &Path, output: &Path) -> Result<(), String> {
 /// executable (`<prefix>/bin/jawac` and `<prefix>/lib/libjawa_rt.a`, which
 /// is also the build tree's layout), or where CMake built it.
 fn runtime_library() -> Result<PathBuf, String> {
-    if let Some(path) = env::var_os("JAWA_RUNTIME_LIB") {
+    if let Some(path) = env_override("JAWA_RUNTIME_LIB") {
         return Ok(PathBuf::from(path));
     }
     if let Some(dir) = env::current_exe()
@@ -66,4 +66,10 @@ fn runtime_library() -> Result<PathBuf, String> {
     Err(format!(
         "cannot find the Jawa runtime ({RUNTIME_NAME})\n  = note: set JAWA_RUNTIME_LIB to its path"
     ))
+}
+
+/// An environment variable that overrides a default; set but empty counts as
+/// unset.
+fn env_override(name: &str) -> Option<OsString> {
+    env::var_os(name).filter(|value| !value.is_empty())
 }
