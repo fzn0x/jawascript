@@ -1,0 +1,38 @@
+// RUN: not jawac check %s 2>&1 | FileCheck %s --implicit-check-not=error:
+
+// A function with a result type must return on every path.
+
+// CHECK: error: `tandha` can reach its end without returning a `wilangan`
+// CHECK: = note: add a `bali` with a value on every path
+gawe tandha(n: wilangan) -> wilangan {
+    yen n > 0 {
+        bali 1
+    } liyane yen n < 0 {
+        bali -1
+    }
+}
+
+// Every branch returning, or a loop that never ends, is fine.
+gawe mutlak(n: wilangan) -> wilangan {
+    yen n < 0 {
+        bali -n
+    } liyane {
+        bali n
+    }
+}
+
+gawe salawase() -> wilangan {
+    sajrone bener {
+        bali 1
+    }
+}
+
+gawe utama() {
+    tulis(mutlak(-3), salawase())
+    bali
+    // CHECK: warning: unreachable code
+    // CHECK-NEXT: --> {{.*}}returns.jw:[[@LINE+1]]:5
+    tulis("ora tau")
+}
+
+// CHECK: error: could not compile

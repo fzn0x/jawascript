@@ -1,0 +1,35 @@
+// RUN: not jawac check %s 2>&1 | FileCheck %s --implicit-check-not=error:
+
+wujud Simpul {
+    regane: wilangan
+}
+
+gawe utama() {
+    ayo jeneng = "Jawa"
+    // CHECK: error: unknown variable `jenneng`
+    // CHECK-NEXT: --> {{.*}}names.jw:[[@LINE+2]]:11
+    // CHECK: = note: did you mean `jeneng`?
+    tulis(jenneng)
+
+    // CHECK: error: unknown function `tuliss`
+    // CHECK: = note: did you mean `tulis`?
+    tuliss(1)
+
+    // CHECK: error: `Simpul` is a struct, not a function
+    // CHECK: = note: build one with `Simpul { field: value, … }`
+    Simpul(1)
+
+    // CHECK: error: `Simpul` has no field `regan`
+    // CHECK: = note: did you mean `regane`?
+    tulis(Simpul { regane: 1 }.regan)
+
+    // CHECK: error: unknown type `Simpl`
+    // CHECK: = note: did you mean `Simpul`?
+    ayo s: Simpl = kosong
+}
+
+// CHECK: error: `tulis` is a built-in function and cannot be redefined
+gawe tulis(x: wilangan) {
+}
+
+// CHECK: error: could not compile `{{.*}}names.jw` because of 6 errors

@@ -1,0 +1,55 @@
+// RUN: not jawac check %s 2>&1 | FileCheck %s --implicit-check-not=error:
+
+wujud Titik {
+    x: wilangan
+    y: wilangan
+}
+
+gawe tikel(n: wilangan) -> wilangan {
+    bali n * 2
+}
+
+gawe utama() {
+    // CHECK: error: expected `wilangan` for `a`, found `ukara`
+    // CHECK-NEXT: --> {{.*}}types.jw:[[@LINE+3]]:23
+    // CHECK: |     ayo a: wilangan = "siji"
+    // CHECK-NEXT: |                       ^^^^^^
+    ayo a: wilangan = "siji"
+
+    // CHECK: error: cannot use `+` on `wilangan` and `pecahan`
+    // CHECK: = note: convert one side first, such as `pecahan(n)` or `wilangan(x)`
+    ayo b = 1
+    ayo c = 2.5
+    tulis(b + c)
+
+    // CHECK: error: expected `wilangan` for argument 1 of `tikel`, found `logika`
+    tikel(bener)
+
+    // CHECK: error: `tikel` takes 1 argument, but 2 were given
+    tikel(1, 2)
+
+    // CHECK: error: expected `logika` for the `yen` condition, found `wilangan`
+    yen b {
+    }
+
+    // CHECK: error: missing field `y` in `Titik`
+    ayo p = Titik { x: 1 }
+
+    // CHECK: error: cannot print `Titik`
+    // CHECK: = note: print its fields instead, such as `tulis(p.x)`
+    tulis(Titik { x: 1, y: 2 })
+
+    // CHECK: error: cannot tell the element type of an empty array
+    // CHECK: = note: add a type, such as `ayo xs: [wilangan] = []`
+    ayo xs = []
+
+    // CHECK: error: cannot assign to `t`, it does not change
+    // CHECK: = note: declare it with `ayo` instead of `tetep` to change it
+    tetep t = 1
+    t = 2
+
+    // CHECK: error: `mandheg` outside a loop
+    mandheg
+}
+
+// CHECK: error: could not compile `{{.*}}types.jw` because of 10 errors
