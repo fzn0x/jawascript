@@ -1,5 +1,7 @@
 # JawaScript
 
+[![CI](https://github.com/fzn0x/jawascript/actions/workflows/ci.yml/badge.svg)](https://github.com/fzn0x/jawascript/actions/workflows/ci.yml)
+
 A compiled programming language with Javanese keywords. You write `gawe` for a function, `ayo` for a variable, `yen` and `liyane` for if and else, `kanggo … ing` for loops and `bali` to return, and `jawac` turns it into a native executable.
 
 ```rust
