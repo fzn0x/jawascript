@@ -22,6 +22,7 @@
 
 use crate::ast::*;
 use crate::diag::Diagnostic;
+use crate::hints;
 use crate::lexer;
 use crate::source::Span;
 use crate::token::{TemplatePiece, Token, TokenKind};
@@ -197,6 +198,11 @@ impl Parser {
                         diag = diag.with_note(
                             "statements go inside a function, such as `gawe utama() { … }`",
                         );
+                    }
+                    if let TokenKind::Ident(word) = &found {
+                        if let Some(note) = hints::note_for(word) {
+                            diag = diag.with_note(note);
+                        }
                     }
                     self.diagnostics.push(diag);
                     self.advance();
@@ -491,6 +497,38 @@ impl Parser {
             }
             TokenKind::Liyane => {
                 self.error_here("`liyane` without a `yen` before it");
+                Err(())
+            }
+            // `let x = 1`, `return x`, `if (x) { … }`: a JavaScript keyword
+            // where a Jawa one belongs. A variable that happens to be called
+            // `let` is still fine: `let = 1`, `let.x`, `let[0]`.
+            TokenKind::Ident(word)
+                if hints::starts_javascript_statement(word)
+                    && !matches!(
+                        self.peek_at(1),
+                        TokenKind::Eq
+                            | TokenKind::PlusEq
+                            | TokenKind::MinusEq
+                            | TokenKind::StarEq
+                            | TokenKind::SlashEq
+                            | TokenKind::PercentEq
+                            | TokenKind::PlusPlus
+                            | TokenKind::MinusMinus
+                            | TokenKind::Dot
+                            | TokenKind::LBracket
+                            | TokenKind::Semi
+                            | TokenKind::Newline
+                            | TokenKind::RBrace
+                            | TokenKind::Eof
+                    ) =>
+            {
+                let word = word.clone();
+                let mut diag =
+                    Diagnostic::error(self.span(), format!("`{word}` is not a Jawa keyword"));
+                if let Some(note) = hints::note_for(&word) {
+                    diag = diag.with_note(note);
+                }
+                self.diagnostics.push(diag);
                 Err(())
             }
             _ => self.expr_or_assign(),
@@ -989,11 +1027,14 @@ impl Parser {
                     self.advance();
                     let field = self.ident("after `.`")?;
                     if self.at(&TokenKind::LParen) {
+                        let note = if matches!(&expr.kind, ExprKind::Name(base) if base == "console")
+                        {
+                            "print with `tulis(…)`".to_string()
+                        } else {
+                            format!("call it as a function instead: `{}(value, …)`", field.name)
+                        };
                         let diag = Diagnostic::error(field.span, "methods are not supported")
-                            .with_note(format!(
-                                "call it as a function instead: `{}(value, …)`",
-                                field.name
-                            ));
+                            .with_note(note);
                         self.diagnostics.push(diag);
                         return Err(());
                     }

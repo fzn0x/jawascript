@@ -12,6 +12,7 @@
 
 use crate::ast::{self, BinaryOp, ElseBranch, ForIter, TypeExprKind, UnaryOp};
 use crate::diag::Diagnostic;
+use crate::hints;
 use crate::hir::*;
 use crate::source::Span;
 use std::collections::HashMap;
@@ -697,10 +698,11 @@ impl Checker {
         self.unknown_name(span, format!("unknown variable `{name}`"), name, similar);
     }
 
-    /// Reports an unknown name, with the closest known name if there is one.
+    /// Reports an unknown name, with how Jawa spells it if it is a
+    /// JavaScript or TypeScript word, or else the closest known name.
     fn unknown_name(&mut self, span: Span, message: String, name: &str, similar: Option<String>) {
-        let _ = name;
-        let note = similar.map(|similar| format!("did you mean `{similar}`?"));
+        let note = hints::note_for(name)
+            .or_else(|| similar.map(|similar| format!("did you mean `{similar}`?")));
         match note {
             Some(note) => self.error_with_note(span, message, note),
             None => self.error(span, message),

@@ -1,0 +1,31 @@
+// RUN: not jawac check %s 2>&1 | FileCheck %s --implicit-check-not=error:
+
+// Jawa's syntax follows JavaScript and TypeScript, but its words are
+// Javanese; a JavaScript keyword gets one error that names the Jawa word.
+
+// CHECK: error: expected `gawe` or `wujud`, found identifier `function`
+// CHECK: = note: Jawa writes `function` as `gawe`
+function halo() {
+}
+
+gawe utama() {
+    // CHECK: error: `let` is not a Jawa keyword
+    // CHECK: = note: Jawa writes `let` as `ayo`
+    let x = 1
+
+    // CHECK: error: `const` is not a Jawa keyword
+    // CHECK: = note: Jawa writes `const` as `tetep`
+    const y = 2
+
+    // CHECK: error: `if` is not a Jawa keyword
+    // CHECK: = note: Jawa writes `if` as `yen`
+    if (x > 0) {
+        tulis(x)
+    }
+
+    // CHECK: error: methods are not supported
+    // CHECK: = note: print with `tulis(…)`
+    console.log(x)
+}
+
+// CHECK: error: could not compile `{{.*}}javascript-habits.jw` because of 5 errors

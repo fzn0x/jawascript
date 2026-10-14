@@ -1,0 +1,26 @@
+// RUN: not jawac check %s 2>&1 | FileCheck %s --implicit-check-not=error:
+
+// TypeScript's type names and JavaScript's values, used where Jawa expects
+// its own, point to the Jawa spelling.
+
+// CHECK: error: unknown type `number`
+// CHECK: = note: Jawa writes `number` as `wilangan` or `pecahan`
+gawe tikel(n: number): wilangan {
+    bali n * 2
+}
+
+gawe utama() {
+    // CHECK: error: unknown type `string`
+    // CHECK: = note: Jawa writes `string` as `ukara`
+    ayo s: string = "a"
+
+    // CHECK: error: unknown variable `true`
+    // CHECK: = note: Jawa writes `true` as `bener`
+    ayo ok = true
+
+    // CHECK: error: unknown function `print`
+    // CHECK: = note: Jawa writes `print` as `tulis`
+    print(s)
+}
+
+// CHECK: error: could not compile `{{.*}}typescript-names.jw` because of 4 errors
