@@ -21,8 +21,26 @@
 #include "mlir/IR/DialectRegistry.h"
 #include "mlir/Tools/mlir-opt/MlirOptMain.h"
 #include "mlir/Transforms/Passes.h"
+#include "llvm/ADT/StringRef.h"
+
+#include <vector>
 
 int main(int argc, char **argv) {
+#ifdef __MINGW32__
+  // MSYS2's MLIR libraries crash when two threads create the same attribute
+  // at once (stock mlir-opt does too), so run passes on one thread there.
+  std::vector<char *> args(argv, argv + argc);
+  static char disableThreading[] = "--mlir-disable-threading";
+  bool alreadyDisabled = false;
+  for (char *arg : args)
+    alreadyDisabled |= llvm::StringRef(arg) == disableThreading;
+  if (!alreadyDisabled)
+    args.push_back(disableThreading);
+  argc = static_cast<int>(args.size());
+  args.push_back(nullptr);
+  argv = args.data();
+#endif
+
   mlir::DialectRegistry registry;
   registry.insert<mlir::jawa::JawaDialect, mlir::arith::ArithDialect,
                   mlir::func::FuncDialect, mlir::cf::ControlFlowDialect,
