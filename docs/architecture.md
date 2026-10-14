@@ -3,7 +3,7 @@
 This guide follows one small program through every stage of the compiler:
 
 ```rust
-gawe jumlah(xs: [wilangan]) -> wilangan {
+gawe jumlah(xs: wilangan[]): wilangan {
     ayo total = 0
     kanggo x ing xs {
         total += x
