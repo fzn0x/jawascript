@@ -7,7 +7,8 @@ import lit.formats
 from lit.llvm import llvm_config
 
 config.name = "Jawa"
-config.test_format = lit.formats.ShTest(not llvm_config.use_lit_shell)
+# lit's internal shell, on every platform: LLVM 23 deprecates the external one.
+config.test_format = lit.formats.ShTest(execute_external=False)
 config.suffixes = [".mlir", ".jw", ".test"]
 config.excludes = ["Inputs", "CMakeLists.txt", "README.md", "lit.cfg.py", "lit.site.cfg.py"]
 
