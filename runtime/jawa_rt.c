@@ -51,9 +51,7 @@ _Noreturn void jawa_rt_panic_index(int64_t index, int64_t len) {
        index, len);
 }
 
-_Noreturn void jawa_rt_panic_null(void) {
-  fail("used a field of `kosong`");
-}
+_Noreturn void jawa_rt_panic_null(void) { fail("used a field of `kosong`"); }
 
 _Noreturn void jawa_rt_panic_div_zero(void) { fail("division by zero"); }
 

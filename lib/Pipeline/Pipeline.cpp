@@ -59,8 +59,7 @@ void mlir::jawa::buildJawaOptimizationPipeline(OpPassManager &pm,
   }
 }
 
-void mlir::jawa::buildJawaToLLVMPipeline(OpPassManager &pm,
-                                         unsigned optLevel) {
+void mlir::jawa::buildJawaToLLVMPipeline(OpPassManager &pm, unsigned optLevel) {
   buildJawaOptimizationPipeline(pm, optLevel);
   pm.addPass(createConvertJawaToLLVM());
 }

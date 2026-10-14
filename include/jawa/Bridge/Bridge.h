@@ -94,8 +94,7 @@ public:
                           rust::Slice<const std::uint32_t> elements);
   std::uint32_t array_len(std::uint32_t array);
   std::uint32_t array_get(std::uint32_t array, std::uint32_t index);
-  void array_set(std::uint32_t array, std::uint32_t index,
-                 std::uint32_t value);
+  void array_set(std::uint32_t array, std::uint32_t index, std::uint32_t value);
   void array_push(std::uint32_t array, std::uint32_t value);
   std::uint32_t struct_new(std::uint32_t type,
                            rust::Slice<const std::uint32_t> fields);

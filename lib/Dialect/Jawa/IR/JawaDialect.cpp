@@ -50,9 +50,8 @@ void JawaDialect::initialize() {
   addInterfaces<JawaInlinerInterface>();
 }
 
-Operation *JawaDialect::materializeConstant(OpBuilder &builder,
-                                            Attribute value, Type type,
-                                            Location loc) {
+Operation *JawaDialect::materializeConstant(OpBuilder &builder, Attribute value,
+                                            Type type, Location loc) {
   if (auto text = dyn_cast<StringAttr>(value)) {
     if (isa<StrType>(type))
       return StrConstOp::create(builder, loc, type, text);

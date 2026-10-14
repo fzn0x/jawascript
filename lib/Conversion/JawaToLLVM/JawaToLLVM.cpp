@@ -344,9 +344,9 @@ struct CmpLowering : public JawaPattern<CmpOp> {
       // `str_cmp`'s -1/0/1.
       bool equality =
           predicate == CmpPredicate::eq || predicate == CmpPredicate::ne;
-      Value result = callRuntime(
-          rewriter, loc, equality ? runtime().strEq : runtime().strCmp,
-          {lhs, rhs});
+      Value result = callRuntime(rewriter, loc,
+                                 equality ? runtime().strEq : runtime().strCmp,
+                                 {lhs, rhs});
       Value zero = constI32(rewriter, loc, 0);
       LLVM::ICmpPredicate llvmPredicate =
           equality ? (predicate == CmpPredicate::eq ? LLVM::ICmpPredicate::ne
@@ -443,12 +443,12 @@ struct CastLowering : public JawaPattern<CastOp> {
           rewriter, loc, f64, rewriter.getF64FloatAttr(9223372036854775808.0));
       Value negLimit = LLVM::ConstantOp::create(
           rewriter, loc, f64, rewriter.getF64FloatAttr(-9223372036854775808.0));
-      Value tooBig = LLVM::FCmpOp::create(rewriter, loc,
-                                          LLVM::FCmpPredicate::oge, value, limit);
+      Value tooBig = LLVM::FCmpOp::create(
+          rewriter, loc, LLVM::FCmpPredicate::oge, value, limit);
       Value tooSmall = LLVM::FCmpOp::create(
           rewriter, loc, LLVM::FCmpPredicate::olt, value, negLimit);
-      Value isNaN = LLVM::FCmpOp::create(rewriter, loc,
-                                         LLVM::FCmpPredicate::uno, value, value);
+      Value isNaN = LLVM::FCmpOp::create(
+          rewriter, loc, LLVM::FCmpPredicate::uno, value, value);
       Value max = constI64(rewriter, loc, std::numeric_limits<int64_t>::max());
       Value min = constI64(rewriter, loc, std::numeric_limits<int64_t>::min());
       Value zero = constI64(rewriter, loc, 0);
@@ -488,10 +488,9 @@ struct StrLenLowering : public JawaPattern<StrLenOp> {
 Value elementAddress(OpBuilder &builder, Location loc, Value array,
                      Type elementType, Value index) {
   MLIRContext *context = builder.getContext();
-  Value dataField =
-      LLVM::GEPOp::create(builder, loc, ptrType(context),
-                          arrayHeaderType(context), array,
-                          ArrayRef<LLVM::GEPArg>{0, 2});
+  Value dataField = LLVM::GEPOp::create(builder, loc, ptrType(context),
+                                        arrayHeaderType(context), array,
+                                        ArrayRef<LLVM::GEPArg>{0, 2});
   Value data = LLVM::LoadOp::create(builder, loc, ptrType(context), dataField);
   return LLVM::GEPOp::create(builder, loc, ptrType(context), elementType, data,
                              ArrayRef<LLVM::GEPArg>{index});
@@ -502,8 +501,8 @@ Value elementAddress(OpBuilder &builder, Location loc, Value array,
 void emitBoundsCheck(ConversionPatternRewriter &rewriter, Location loc,
                      const Runtime &runtime, Value array, Value index) {
   Value len = loadLength(rewriter, loc, array);
-  Value outOfBounds = LLVM::ICmpOp::create(
-      rewriter, loc, LLVM::ICmpPredicate::uge, index, len);
+  Value outOfBounds =
+      LLVM::ICmpOp::create(rewriter, loc, LLVM::ICmpPredicate::uge, index, len);
   emitCheck(rewriter, loc, outOfBounds, [&] {
     callRuntime(rewriter, loc, runtime.panicIndex, {index, len});
   });
@@ -604,7 +603,8 @@ struct ArrayPushLowering : public JawaPattern<ArrayPushOp> {
 /// Stops the program if `object` is `kosong`.
 void emitNullCheck(ConversionPatternRewriter &rewriter, Location loc,
                    const Runtime &runtime, Value object) {
-  Value null = LLVM::ZeroOp::create(rewriter, loc, ptrType(rewriter.getContext()));
+  Value null =
+      LLVM::ZeroOp::create(rewriter, loc, ptrType(rewriter.getContext()));
   Value isNull = LLVM::ICmpOp::create(rewriter, loc, LLVM::ICmpPredicate::eq,
                                       object, null);
   emitCheck(rewriter, loc, isNull,
@@ -622,8 +622,8 @@ struct StructNewLowering : public JawaPattern<StructNewOp> {
     if (!layout)
       return rewriter.notifyMatchFailure(op, "unknown struct");
     // A struct with no references inside need not be scanned by the GC.
-    bool hasReferences = llvm::any_of(op.getFields().getTypes(),
-                                      [](Type t) { return isReferenceType(t); });
+    bool hasReferences = llvm::any_of(
+        op.getFields().getTypes(), [](Type t) { return isReferenceType(t); });
     Value object = callRuntime(
         rewriter, loc, hasReferences ? runtime().alloc : runtime().allocAtomic,
         sizeOf(rewriter, loc, layout));
@@ -639,9 +639,9 @@ struct StructNewLowering : public JawaPattern<StructNewOp> {
 };
 
 /// The address of field `index` of `object`, after a null check.
-FailureOr<Value> fieldAddress(ConversionPatternRewriter &rewriter,
-                              Location loc, LoweringState &state,
-                              StructType type, Value object, uint64_t index) {
+FailureOr<Value> fieldAddress(ConversionPatternRewriter &rewriter, Location loc,
+                              LoweringState &state, StructType type,
+                              Value object, uint64_t index) {
   LLVM::LLVMStructType layout = state.structs.lookup(type.getName());
   if (!layout)
     return failure();
@@ -754,8 +754,9 @@ struct PrintLowering : public JawaPattern<PrintOp> {
         callRuntime(rewriter, loc, runtime().printSpace, {});
       Type type = original.getType();
       if (auto array = dyn_cast<ArrayType>(type)) {
-        Value kind = constI32(rewriter, loc,
-                              static_cast<int32_t>(kindOf(array.getElementType())));
+        Value kind =
+            constI32(rewriter, loc,
+                     static_cast<int32_t>(kindOf(array.getElementType())));
         callRuntime(rewriter, loc, runtime().printArray, {value, kind});
         continue;
       }
@@ -848,7 +849,8 @@ struct ConvertJawaToLLVMPass
       return signalPassFailure();
 
     SmallVector<UnrealizedConversionCastOp> casts;
-    module.walk([&](UnrealizedConversionCastOp cast) { casts.push_back(cast); });
+    module.walk(
+        [&](UnrealizedConversionCastOp cast) { casts.push_back(cast); });
     reconcileUnrealizedCasts(casts);
 
     // Struct layouts now live in the GEPs; the definitions can go.
@@ -910,9 +912,9 @@ struct ConvertJawaToLLVMPass
     auto type = LLVM::LLVMStructType::getLiteral(context, {i64, bytes});
 
     OpBuilder::InsertionGuard guard(builder);
-    auto global = LLVM::GlobalOp::create(builder, loc, type, /*isConstant=*/true,
-                                         LLVM::Linkage::Private, name,
-                                         Attribute(), /*alignment=*/8);
+    auto global = LLVM::GlobalOp::create(
+        builder, loc, type, /*isConstant=*/true, LLVM::Linkage::Private, name,
+        Attribute(), /*alignment=*/8);
     Block *init = builder.createBlock(&global.getInitializerRegion());
     builder.setInsertionPointToStart(init);
     std::string data = text.str();

@@ -59,9 +59,8 @@ Block *splitAfter(RewriterBase &rewriter, Operation *op) {
 void flattenIf(RewriterBase &rewriter, IfOp op) {
   Block *continuation = splitAfter(rewriter, op);
   Block *thenEntry = &op.getThenRegion().front();
-  Block *elseEntry = op.getElseRegion().empty()
-                         ? continuation
-                         : &op.getElseRegion().front();
+  Block *elseEntry =
+      op.getElseRegion().empty() ? continuation : &op.getElseRegion().front();
 
   SmallVector<Block *> blocks =
       inlineBlocks(rewriter, op.getThenRegion(), continuation);

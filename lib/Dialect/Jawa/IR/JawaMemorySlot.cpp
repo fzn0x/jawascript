@@ -63,9 +63,10 @@ Value LoadOp::getStored(const MemorySlot &, OpBuilder &, Value,
   llvm_unreachable("jawa.load does not store");
 }
 
-bool LoadOp::canUsesBeRemoved(
-    const MemorySlot &slot, const SmallPtrSetImpl<OpOperand *> &blockingUses,
-    SmallVectorImpl<OpOperand *> &, const DataLayout &) {
+bool LoadOp::canUsesBeRemoved(const MemorySlot &slot,
+                              const SmallPtrSetImpl<OpOperand *> &blockingUses,
+                              SmallVectorImpl<OpOperand *> &,
+                              const DataLayout &) {
   if (blockingUses.size() != 1)
     return false;
   Value used = (*blockingUses.begin())->get();
@@ -73,9 +74,10 @@ bool LoadOp::canUsesBeRemoved(
          getType() == slot.elemType;
 }
 
-DeletionKind LoadOp::removeBlockingUses(
-    const MemorySlot &, const SmallPtrSetImpl<OpOperand *> &, OpBuilder &,
-    Value reachingDefinition, const DataLayout &) {
+DeletionKind LoadOp::removeBlockingUses(const MemorySlot &,
+                                        const SmallPtrSetImpl<OpOperand *> &,
+                                        OpBuilder &, Value reachingDefinition,
+                                        const DataLayout &) {
   getResult().replaceAllUsesWith(reachingDefinition);
   return DeletionKind::Delete;
 }
@@ -93,15 +95,16 @@ Value StoreOp::getStored(const MemorySlot &, OpBuilder &, Value,
   return getValue();
 }
 
-bool StoreOp::canUsesBeRemoved(
-    const MemorySlot &slot, const SmallPtrSetImpl<OpOperand *> &blockingUses,
-    SmallVectorImpl<OpOperand *> &, const DataLayout &) {
+bool StoreOp::canUsesBeRemoved(const MemorySlot &slot,
+                               const SmallPtrSetImpl<OpOperand *> &blockingUses,
+                               SmallVectorImpl<OpOperand *> &,
+                               const DataLayout &) {
   if (blockingUses.size() != 1)
     return false;
   Value used = (*blockingUses.begin())->get();
   // Storing the slot's own address somewhere would let it escape.
-  return used == slot.ptr && getAddr() == slot.ptr &&
-         getValue() != slot.ptr && getValue().getType() == slot.elemType;
+  return used == slot.ptr && getAddr() == slot.ptr && getValue() != slot.ptr &&
+         getValue().getType() == slot.elemType;
 }
 
 DeletionKind StoreOp::removeBlockingUses(const MemorySlot &,

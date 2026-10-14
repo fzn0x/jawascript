@@ -29,8 +29,8 @@ using namespace mlir::jawa;
 namespace {
 using IntFold =
     llvm::function_ref<std::optional<APInt>(const APInt &, const APInt &)>;
-using FloatFold =
-    llvm::function_ref<std::optional<APFloat>(const APFloat &, const APFloat &)>;
+using FloatFold = llvm::function_ref<std::optional<APFloat>(const APFloat &,
+                                                            const APFloat &)>;
 } // namespace
 
 /// Folds a binary operation whose operands are both constants.
@@ -39,7 +39,8 @@ static Attribute foldBinary(Type type, Attribute lhs, Attribute rhs,
   auto lhsInt = dyn_cast_or_null<IntegerAttr>(lhs);
   auto rhsInt = dyn_cast_or_null<IntegerAttr>(rhs);
   if (lhsInt && rhsInt) {
-    if (std::optional<APInt> result = intFold(lhsInt.getValue(), rhsInt.getValue()))
+    if (std::optional<APInt> result =
+            intFold(lhsInt.getValue(), rhsInt.getValue()))
       return IntegerAttr::get(type, *result);
     return {};
   }
@@ -262,7 +263,8 @@ OpFoldResult CmpOp::fold(FoldAdaptor adaptor) {
     return BoolAttr::get(context, applyPredicate(predicate, order));
   }
   if (auto a = dyn_cast<FloatAttr>(lhs)) {
-    APFloat::cmpResult result = a.getValue().compare(cast<FloatAttr>(rhs).getValue());
+    APFloat::cmpResult result =
+        a.getValue().compare(cast<FloatAttr>(rhs).getValue());
     if (result == APFloat::cmpUnordered)
       return BoolAttr::get(context, predicate == CmpPredicate::ne);
     int order = result == APFloat::cmpLessThan
@@ -363,9 +365,8 @@ OpFoldResult CastOp::fold(FoldAdaptor adaptor) {
     return IntegerAttr::get(getType(), result);
   }
   case CastKind::bool_to_int:
-    return IntegerAttr::get(getType(),
-                            cast<IntegerAttr>(value).getValue().isZero() ? 0
-                                                                         : 1);
+    return IntegerAttr::get(
+        getType(), cast<IntegerAttr>(value).getValue().isZero() ? 0 : 1);
   case CastKind::str_to_int:
   case CastKind::str_to_float:
     // Parsing can fail at runtime; leave it to the program.
@@ -395,9 +396,8 @@ LogicalResult ArrayNewOp::verify() {
   Type element = getType().getElementType();
   for (auto [index, value] : llvm::enumerate(getElements()))
     if (value.getType() != element)
-      return emitOpError("element ")
-             << index << " has type " << value.getType() << ", expected "
-             << element;
+      return emitOpError("element ") << index << " has type " << value.getType()
+                                     << ", expected " << element;
   return success();
 }
 
@@ -443,9 +443,9 @@ void StructDefOp::print(OpAsmPrinter &printer) {
         printer.printType(cast<TypeAttr>(std::get<1>(field)).getValue());
       });
   printer << '}';
-  printer.printOptionalAttrDict((*this)->getAttrs(),
-                                {getSymNameAttrName(), getFieldNamesAttrName(),
-                                 getFieldTypesAttrName()});
+  printer.printOptionalAttrDict(
+      (*this)->getAttrs(),
+      {getSymNameAttrName(), getFieldNamesAttrName(), getFieldTypesAttrName()});
 }
 
 ParseResult StructDefOp::parse(OpAsmParser &parser, OperationState &result) {
@@ -491,9 +491,8 @@ LogicalResult StructDefOp::verify() {
       return emitOpError("declares field '") << field << "' twice";
     Type fieldType = cast<TypeAttr>(type).getValue();
     if (!isValueType(fieldType))
-      return emitOpError("field '")
-             << field << "' has type " << fieldType
-             << ", which is not a Jawa value type";
+      return emitOpError("field '") << field << "' has type " << fieldType
+                                    << ", which is not a Jawa value type";
   }
   return success();
 }
@@ -515,13 +514,11 @@ StructNewOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
     return failure();
   if (def.getNumFields() != getFields().size())
     return emitOpError("expects ")
-           << def.getNumFields() << " field values, got "
-           << getFields().size();
+           << def.getNumFields() << " field values, got " << getFields().size();
   for (auto [index, value] : llvm::enumerate(getFields()))
     if (value.getType() != def.getFieldType(index))
-      return emitOpError("field ")
-             << index << " has type " << value.getType() << ", expected "
-             << def.getFieldType(index);
+      return emitOpError("field ") << index << " has type " << value.getType()
+                                   << ", expected " << def.getFieldType(index);
   return success();
 }
 
@@ -540,10 +537,9 @@ static Type verifyFieldAccess(Operation *op, StructType type, uint64_t index,
   return def.getFieldType(index);
 }
 
-LogicalResult
-GetFieldOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
-  Type field = verifyFieldAccess(*this, getObject().getType(), getIndex(),
-                                 symbolTable);
+LogicalResult GetFieldOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
+  Type field =
+      verifyFieldAccess(*this, getObject().getType(), getIndex(), symbolTable);
   if (!field)
     return failure();
   if (getType() != field)
@@ -552,10 +548,9 @@ GetFieldOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
   return success();
 }
 
-LogicalResult
-SetFieldOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
-  Type field = verifyFieldAccess(*this, getObject().getType(), getIndex(),
-                                 symbolTable);
+LogicalResult SetFieldOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
+  Type field =
+      verifyFieldAccess(*this, getObject().getType(), getIndex(), symbolTable);
   if (!field)
     return failure();
   if (getValue().getType() != field)
@@ -596,8 +591,7 @@ static LogicalResult verifyExitRegion(Operation *op, Region &region,
   Operation &terminator = block.back();
   if (!isa<YieldOp, BreakOp, ContinueOp, ReturnOp, UnreachableOp>(terminator))
     return op->emitOpError("'")
-           << name << "' region cannot end in '" << terminator.getName()
-           << "'";
+           << name << "' region cannot end in '" << terminator.getName() << "'";
   return success();
 }
 

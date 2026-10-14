@@ -29,7 +29,8 @@ namespace jawa::bridge {
 
 /// The handle for "no value": a call to a `suwung` function, or `bali`
 /// without a value.
-static constexpr std::uint32_t kNone = std::numeric_limits<std::uint32_t>::max();
+static constexpr std::uint32_t kNone =
+    std::numeric_limits<std::uint32_t>::max();
 
 static StringRef str(rust::Str text) {
   return StringRef(text.data(), text.size());
@@ -258,8 +259,9 @@ std::uint32_t ModuleBuilder::const_float(double value) {
 
 std::uint32_t ModuleBuilder::const_bool(bool value) {
   OpBuilder &builder = impl->builder;
-  return impl->addValue(ConstantOp::create(
-      builder, impl->location, builder.getI1Type(), builder.getBoolAttr(value)));
+  return impl->addValue(ConstantOp::create(builder, impl->location,
+                                           builder.getI1Type(),
+                                           builder.getBoolAttr(value)));
 }
 
 std::uint32_t ModuleBuilder::const_str(rust::Str value) {
@@ -331,14 +333,14 @@ std::uint32_t ModuleBuilder::compare(Predicate predicate, std::uint32_t lhs,
 
 std::uint32_t ModuleBuilder::negate(std::uint32_t value) {
   Value operand = impl->value(value);
-  return impl->addValue(NegOp::create(impl->builder, impl->location,
-                                      operand.getType(), operand));
+  return impl->addValue(
+      NegOp::create(impl->builder, impl->location, operand.getType(), operand));
 }
 
 std::uint32_t ModuleBuilder::logical_not(std::uint32_t value) {
   Value operand = impl->value(value);
-  return impl->addValue(NotOp::create(impl->builder, impl->location,
-                                      operand.getType(), operand));
+  return impl->addValue(
+      NotOp::create(impl->builder, impl->location, operand.getType(), operand));
 }
 
 std::uint32_t ModuleBuilder::concat(std::uint32_t lhs, std::uint32_t rhs) {
@@ -381,9 +383,8 @@ std::uint32_t ModuleBuilder::cast(CastKind kind, std::uint32_t value) {
 
 std::uint32_t ModuleBuilder::str_len(std::uint32_t value) {
   OpBuilder &builder = impl->builder;
-  return impl->addValue(StrLenOp::create(builder, impl->location,
-                                         builder.getI64Type(),
-                                         impl->value(value)));
+  return impl->addValue(StrLenOp::create(
+      builder, impl->location, builder.getI64Type(), impl->value(value)));
 }
 
 //===----------------------------------------------------------------------===//
@@ -399,9 +400,9 @@ std::uint32_t ModuleBuilder::local(std::uint32_t type, rust::Str name) {
     builder.setInsertionPointAfter(impl->lastSlot);
   else
     builder.setInsertionPointToStart(&impl->function.getBody().front());
-  auto slot = AllocaOp::create(builder, impl->location,
-                               PtrType::get(&impl->context, impl->types.at(type)),
-                               str(name));
+  auto slot = AllocaOp::create(
+      builder, impl->location,
+      PtrType::get(&impl->context, impl->types.at(type)), str(name));
   impl->lastSlot = slot;
   return impl->addValue(slot);
 }
@@ -454,18 +455,16 @@ ModuleBuilder::array_new(std::uint32_t type,
 
 std::uint32_t ModuleBuilder::array_len(std::uint32_t array) {
   OpBuilder &builder = impl->builder;
-  return impl->addValue(ArrayLenOp::create(builder, impl->location,
-                                           builder.getI64Type(),
-                                           impl->value(array)));
+  return impl->addValue(ArrayLenOp::create(
+      builder, impl->location, builder.getI64Type(), impl->value(array)));
 }
 
 std::uint32_t ModuleBuilder::array_get(std::uint32_t array,
                                        std::uint32_t index) {
   Value arrayValue = impl->value(array);
   Type element = llvm::cast<ArrayType>(arrayValue.getType()).getElementType();
-  return impl->addValue(ArrayGetOp::create(impl->builder, impl->location,
-                                           element, arrayValue,
-                                           impl->value(index)));
+  return impl->addValue(ArrayGetOp::create(
+      impl->builder, impl->location, element, arrayValue, impl->value(index)));
 }
 
 void ModuleBuilder::array_set(std::uint32_t array, std::uint32_t index,
@@ -493,8 +492,8 @@ std::uint32_t ModuleBuilder::get_field(std::uint32_t object,
   auto type = llvm::cast<StructType>(objectValue.getType());
   auto def = impl->module->lookupSymbol<StructDefOp>(type.getName());
   return impl->addValue(GetFieldOp::create(impl->builder, impl->location,
-                                           def.getFieldType(index),
-                                           objectValue, index));
+                                           def.getFieldType(index), objectValue,
+                                           index));
 }
 
 void ModuleBuilder::set_field(std::uint32_t object, std::uint32_t index,
@@ -508,8 +507,7 @@ void ModuleBuilder::set_field(std::uint32_t object, std::uint32_t index,
 //===----------------------------------------------------------------------===//
 
 void ModuleBuilder::begin_if(std::uint32_t condition) {
-  auto op =
-      IfOp::create(impl->builder, impl->location, impl->value(condition));
+  auto op = IfOp::create(impl->builder, impl->location, impl->value(condition));
   impl->open.push_back(op);
   impl->builder.createBlock(&op.getThenRegion());
 }
